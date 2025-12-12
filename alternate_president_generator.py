@@ -29,47 +29,109 @@ ORIGINAL_13_COLONIES = [
 ]
 
 # Period-accurate first names by era
+# Pre-2000: Traditional white American names only
+# Post-2000: More diverse names reflecting modern America
 FIRST_NAMES_MALE = {
     "early": ["George", "John", "Thomas", "James", "William", "Benjamin", "Samuel",
               "Joseph", "Abraham", "Daniel", "Henry", "Charles", "Robert", "Edward",
-              "Andrew", "Richard", "Peter", "Jonathan", "Isaac", "Jacob", "David"],
+              "Andrew", "Richard", "Peter", "Jonathan", "Isaac", "Jacob", "David",
+              "Nathaniel", "Elijah", "Josiah", "Ezekiel", "Solomon", "Caleb", "Seth",
+              "Silas", "Ebenezer", "Jeremiah", "Timothy", "Matthias", "Zachariah",
+              "Gideon", "Amos", "Rufus", "Cyrus", "Levi", "Moses", "Aaron", "Enoch",
+              "Ezra", "Obadiah", "Lemuel", "Barnabas", "Cornelius", "Simeon", "Tobias",
+              "Reuben", "Phinehas", "Jedediah", "Hiram", "Asher", "Ephraim", "Ichabod"],
     "mid": ["William", "James", "John", "George", "Charles", "Frank", "Henry", "Thomas",
             "Edward", "Walter", "Arthur", "Frederick", "Albert", "Harry", "Samuel",
-            "Clarence", "Louis", "Theodore", "Benjamin", "Oscar", "Herbert"],
+            "Clarence", "Louis", "Theodore", "Benjamin", "Oscar", "Herbert", "Howard",
+            "Eugene", "Ernest", "Ralph", "Roy", "Leon", "Earl", "Lawrence", "Alfred",
+            "Chester", "Floyd", "Homer", "Lester", "Leonard", "Raymond", "Clifford",
+            "Edwin", "Stanley", "Lloyd", "Calvin", "Norman", "Vernon", "Willard",
+            "Elmer", "Milton", "Julius", "Harvey", "Herman", "Horace", "Virgil",
+            "Francis", "Luther", "Clyde", "Russell", "Harold", "Edgar", "Percy"],
     "late": ["Robert", "James", "John", "William", "Richard", "Charles", "Donald",
              "George", "Kenneth", "Joseph", "Thomas", "David", "Edward", "Ronald",
-             "Paul", "Raymond", "Harold", "Walter", "Jack", "Gerald", "Carl"],
+             "Paul", "Raymond", "Harold", "Walter", "Jack", "Gerald", "Carl",
+             "Dennis", "Larry", "Gary", "Roger", "Frank", "Terry", "Jerry", "Douglas",
+             "Peter", "Henry", "Patrick", "Philip", "Stephen", "Gregory", "Bruce",
+             "Albert", "Eugene", "Roy", "Ralph", "Arthur", "Russell", "Ernest",
+             "Alan", "Lawrence", "Wayne", "Louis", "Howard", "Keith", "Randy",
+             "Scott", "Timothy", "Martin", "Jeffrey", "Frederick", "Samuel", "Vincent"],
     "modern": ["Michael", "James", "Robert", "John", "David", "William", "Richard",
                "Thomas", "Charles", "Christopher", "Daniel", "Matthew", "Donald",
-               "Steven", "Paul", "Mark", "George", "Kenneth", "Andrew", "Brian"]
+               "Steven", "Paul", "Mark", "George", "Kenneth", "Andrew", "Brian",
+               "Joshua", "Kevin", "Ronald", "Timothy", "Jason", "Jeffrey", "Ryan",
+               "Jacob", "Gary", "Nicholas", "Eric", "Jonathan", "Stephen", "Larry",
+               "Justin", "Scott", "Brandon", "Benjamin", "Samuel", "Raymond", "Gregory",
+               "Alexander", "Patrick", "Frank", "Dennis", "Jerry", "Tyler", "Aaron",
+               "Jose", "Adam", "Henry", "Nathan", "Douglas", "Zachary", "Peter", "Kyle",
+               "Walter", "Ethan", "Jeremy", "Harold", "Keith", "Christian", "Roger"]
 }
 
 FIRST_NAMES_FEMALE = {
     "early": ["Martha", "Abigail", "Elizabeth", "Sarah", "Mary", "Ann", "Hannah",
-              "Rebecca", "Catherine", "Margaret", "Jane", "Rachel", "Prudence"],
+              "Rebecca", "Catherine", "Margaret", "Jane", "Rachel", "Prudence",
+              "Deborah", "Ruth", "Esther", "Lydia", "Phoebe", "Susannah", "Priscilla",
+              "Mercy", "Charity", "Temperance", "Mehitabel", "Bathsheba", "Tabitha",
+              "Naomi", "Miriam", "Judith", "Eleanor", "Charlotte", "Sophia", "Harriet",
+              "Betsy", "Polly", "Sally", "Nancy", "Peggy", "Molly", "Patsy"],
     "mid": ["Mary", "Anna", "Margaret", "Helen", "Elizabeth", "Ruth", "Florence",
-            "Emma", "Alice", "Grace", "Sarah", "Clara", "Lillian", "Edith"],
+            "Emma", "Alice", "Grace", "Sarah", "Clara", "Lillian", "Edith", "Ethel",
+            "Mabel", "Gertrude", "Bertha", "Rose", "Hazel", "Martha", "Minnie",
+            "Catherine", "Nellie", "Frances", "Annie", "Bessie", "Pearl", "Myrtle",
+            "Eva", "Louise", "Elsie", "Ella", "Agnes", "Josephine", "Gladys",
+            "Beatrice", "Esther", "Laura", "Blanche", "Viola", "Irene", "Hilda",
+            "Stella", "Ida", "Alma", "Cora", "Lena", "Ada", "Dora", "Edna"],
     "late": ["Mary", "Barbara", "Patricia", "Carol", "Sandra", "Nancy", "Sharon",
-             "Judith", "Susan", "Betty", "Margaret", "Linda", "Dorothy", "Helen"],
+             "Judith", "Susan", "Betty", "Margaret", "Linda", "Dorothy", "Helen",
+             "Karen", "Donna", "Deborah", "Cynthia", "Kathleen", "Pamela", "Brenda",
+             "Virginia", "Janet", "Catherine", "Carolyn", "Ruth", "Diane", "Joyce",
+             "Christine", "Frances", "Ann", "Jean", "Alice", "Janice", "Beverly",
+             "Doris", "Gloria", "Evelyn", "Joan", "Cheryl", "Martha", "Judy",
+             "Marilyn", "Eleanor", "Teresa", "Phyllis", "Shirley", "Bonnie", "Lois"],
     "modern": ["Jennifer", "Michelle", "Lisa", "Karen", "Angela", "Kimberly",
                "Elizabeth", "Sarah", "Jessica", "Amanda", "Melissa", "Nicole",
-               "Amy", "Rebecca", "Laura", "Stephanie", "Rachel", "Catherine"]
+               "Amy", "Rebecca", "Laura", "Stephanie", "Rachel", "Catherine",
+               "Emily", "Ashley", "Samantha", "Heather", "Christine", "Anna",
+               "Megan", "Lauren", "Katherine", "Hannah", "Alexandra", "Danielle",
+               "Brittany", "Madison", "Christina", "Olivia", "Amber", "Kelly",
+               "Maria", "Susan", "Tiffany", "Michelle", "Sandra", "Kathryn",
+               "Patricia", "Nancy", "Linda", "Barbara", "Margaret", "Carol",
+               "Dorothy", "Betty", "Helen", "Ruth", "Sharon", "Donna", "Deborah"]
 }
 
+# Last names - traditional American surnames until 2000, more diverse after
 LAST_NAMES = {
     "early": ["Washington", "Adams", "Jefferson", "Madison", "Monroe", "Hamilton",
               "Franklin", "Hancock", "Sherman", "Morris", "Wilson", "Randolph",
-              "Lee", "Marshall", "Jay", "Henry", "Livingston", "Ellsworth", "Pinckney"],
+              "Lee", "Marshall", "Jay", "Henry", "Livingston", "Ellsworth", "Pinckney",
+              "Bradford", "Winthrop", "Mather", "Brewster", "Standish", "Alden",
+              "Hopkins", "Carver", "Warren", "Revere", "Knox", "Greene", "Wayne",
+              "Putnam", "Stark", "Allen", "Clinton", "Burr", "Van Buren", "Calhoun"],
     "mid": ["Johnson", "Smith", "Brown", "Williams", "Jones", "Miller", "Davis",
             "Wilson", "Anderson", "Taylor", "Thomas", "Jackson", "White", "Harris",
-            "Martin", "Thompson", "Garcia", "Martinez", "Robinson", "Clark", "Lewis"],
+            "Martin", "Thompson", "Robinson", "Clark", "Lewis", "Walker", "Hall",
+            "Allen", "Young", "King", "Wright", "Scott", "Green", "Baker", "Adams",
+            "Nelson", "Carter", "Mitchell", "Perez", "Roberts", "Turner", "Phillips",
+            "Campbell", "Parker", "Evans", "Edwards", "Collins", "Stewart", "Morris",
+            "Rogers", "Reed", "Cook", "Morgan", "Bell", "Murphy", "Bailey", "Cooper",
+            "Richardson", "Cox", "Howard", "Ward", "Peterson", "Gray", "Hughes"],
     "late": ["Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis",
-             "Garcia", "Rodriguez", "Wilson", "Martinez", "Anderson", "Taylor",
-             "Thomas", "Moore", "Jackson", "Martin", "Lee", "Thompson", "White"],
+             "Wilson", "Anderson", "Taylor", "Thomas", "Moore", "Jackson", "Martin",
+             "Lee", "Thompson", "White", "Harris", "Clark", "Lewis", "Robinson",
+             "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Green",
+             "Adams", "Baker", "Gonzalez", "Nelson", "Carter", "Mitchell", "Perez",
+             "Roberts", "Turner", "Phillips", "Campbell", "Parker", "Evans", "Edwards",
+             "Collins", "Stewart", "Sanchez", "Morris", "Rogers", "Reed", "Cook",
+             "Morgan", "Bell", "Murphy", "Bailey", "Rivera", "Cooper", "Richardson"],
     "modern": ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller",
                "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez",
                "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin",
-               "Lee", "Thompson", "White", "Harris", "Sanchez", "Clark", "Lewis"]
+               "Lee", "Thompson", "White", "Harris", "Sanchez", "Clark", "Lewis",
+               "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott",
+               "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson",
+               "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts",
+               "Gomez", "Phillips", "Evans", "Turner", "Diaz", "Parker", "Cruz",
+               "Edwards", "Collins", "Reyes", "Stewart", "Morris", "Morales", "Murphy"]
 }
 
 # Color names for parties
@@ -102,7 +164,14 @@ def generate_random_name(year, is_female=False):
     else:
         first_name = random.choice(FIRST_NAMES_MALE[era])
 
-    last_name = random.choice(LAST_NAMES[era])
+    # Keep trying until we get a different last name
+    # Prevents names like "Thomas Thomas"
+    max_attempts = 100
+    for _ in range(max_attempts):
+        last_name = random.choice(LAST_NAMES[era])
+        if first_name != last_name:
+            break
+
     return f"{first_name} {last_name}"
 
 
@@ -219,10 +288,11 @@ class Party:
 class President:
     """Represents a president"""
 
-    def __init__(self, election_year, party=None, is_successor=False):
+    def __init__(self, election_year, party=None, is_successor=False, is_first_president=False):
         self.election_year = election_year
         self.party = party
         self.is_successor = is_successor
+        self.is_first_president = is_first_president
 
         # Generate gender (male until 2000, then weighted)
         if election_year < 2000:
@@ -260,9 +330,15 @@ class President:
         else:
             self.num_terms = 2
 
-        # Calculate term years (office starts year after election)
-        self.term_start = election_year + 1
-        self.term_end = election_year + (self.num_terms * 4)
+        # Calculate term years
+        # First president (1789) starts immediately, others start year after election
+        if is_first_president:
+            self.term_start = election_year  # 1789
+            self.term_end = election_year + (self.num_terms * 4) - 1  # 1792 or 1796
+        else:
+            self.term_start = election_year + 1
+            self.term_end = election_year + (self.num_terms * 4)
+
         self.completed_term_end = self.term_end
 
         # If dies in office, determine when
@@ -397,9 +473,9 @@ class AlternateHistoryGenerator:
             if not party.dissolved and party.check_dissolution(year):
                 print(f"\n{party.name} has dissolved after {year - party.last_in_power} years out of power.")
 
-    def generate_president(self, year, party=None, is_successor=False):
+    def generate_president(self, year, party=None, is_successor=False, is_first_president=False):
         """Generate a new president"""
-        president = President(year, party, is_successor)
+        president = President(year, party, is_successor, is_first_president)
 
         # Update party's last_in_power
         if party:
@@ -447,18 +523,19 @@ class AlternateHistoryGenerator:
         print("ALTERNATE US PRESIDENTIAL HISTORY GENERATOR")
         print("="*80)
 
-        # First president (1789, no party)
+        # First president (1789, no party, starts immediately)
         print(f"\nGenerating first president (1789)...")
-        first_president = self.generate_president(1789, party=None)
+        first_president = self.generate_president(1789, party=None, is_first_president=True)
         self.presidents.append(first_president)
         print(first_president)
 
-        # Handle successor if first president dies
-        next_election_year = first_president.term_end
+        # Next election happens in the year the term ends
+        next_election_year = first_president.completed_term_end
         if first_president.dies_in_office:
             successor = self.generate_successor(first_president)
             first_president.successor = successor
             self.presidents.append(successor)
+            # Next election is when the successor's term ends
             next_election_year = successor.term_end
             print(f"\nSuccessor for {first_president.name}:")
             print(successor)
@@ -499,12 +576,15 @@ class AlternateHistoryGenerator:
             self.presidents.append(president)
             print(president)
 
+            # Next election happens in the year the term ends
+            next_election_year = president.completed_term_end
+
             # Handle successor if president dies
-            next_election_year = president.term_end
             if president.dies_in_office:
                 successor = self.generate_successor(president)
                 president.successor = successor
                 self.presidents.append(successor)
+                # Next election is when the successor's term ends
                 next_election_year = successor.term_end
                 print(f"\nSuccessor for {president.name}:")
                 print(successor)
