@@ -237,7 +237,9 @@ class President:
         self.name = generate_random_name(election_year, is_female)
 
         # Generate personality using character generator
-        self.personality = generate_mbti_profile()
+        # Pass 'M' or 'F' to match the president's gender
+        gender_code = 'F' if is_female else 'M'
+        self.personality = generate_mbti_profile(gender_code)
 
         # Determine if dies during presidency
         death_roll = random.randint(1, 45)
@@ -258,19 +260,17 @@ class President:
         else:
             self.num_terms = 2
 
+        # Calculate term years (office starts year after election)
+        self.term_start = election_year + 1
+        self.term_end = election_year + (self.num_terms * 4)
+        self.completed_term_end = self.term_end
+
         # If dies in office, determine when
         self.death_year = None
         if self.dies_in_office:
-            years_in_office = self.num_terms * 4
-            self.death_year = election_year + random.randint(1, years_in_office)
-
-        # Calculate term end year
-        if self.dies_in_office:
+            # Die sometime during their term(s)
+            self.death_year = random.randint(self.term_start, self.term_end)
             self.term_end = self.death_year
-            self.completed_term_end = election_year + (self.num_terms * 4)
-        else:
-            self.term_end = election_year + (self.num_terms * 4)
-            self.completed_term_end = self.term_end
 
         # Generate political compass scores
         if party is None:
@@ -327,7 +327,8 @@ class President:
         result = [
             f"\n{'='*80}",
             f"President: {self.name} ({self.gender})",
-            f"Term: {self.election_year}-{self.term_end}",
+            f"Election Year: {self.election_year}",
+            f"Term: {self.term_start}-{self.term_end}",
             f"Party: {party_str}",
             f"Number of Terms: {terms_str}",
         ]
@@ -409,28 +410,34 @@ class AlternateHistoryGenerator:
     def generate_successor(self, deceased_president):
         """Generate a successor when a president dies in office"""
         # Successor from same party, continues the term
-        successor = President(deceased_president.death_year, deceased_president.party, is_successor=True)
-
-        # Successor completes the original term
-        successor.election_year = deceased_president.death_year
+        # The "election_year" for successor is the year of the next actual election (original term end)
         original_term_end = deceased_president.completed_term_end
+        successor = President(original_term_end, deceased_president.party, is_successor=True)
 
-        # Check if successor gets reelected
+        # Override the automatic term calculation since this is a succession
+        # Successor takes office immediately upon death
+        successor.term_start = deceased_president.death_year
+        successor.term_end = original_term_end
+
+        # Check if successor gets reelected for additional terms
         reelection_roll = random.randint(1, 2)
         if reelection_roll == 2:
-            # Reelected - determine number of terms
+            # Reelected - determine number of additional terms
             term_roll = random.randint(1, 46)
             if term_roll <= 16:
-                successor.num_terms = 1
+                additional_terms = 1
             else:
-                successor.num_terms = 2
+                additional_terms = 2
 
-            # Calculate new term end
-            successor.term_end = original_term_end + (successor.num_terms * 4)
+            # Update election year and term end for the reelection
+            successor.election_year = original_term_end
+            successor.num_terms = additional_terms
+            successor.term_end = original_term_end + (additional_terms * 4)
         else:
             # Not reelected - only completes original term
-            successor.term_end = original_term_end
+            successor.election_year = deceased_president.election_year  # They weren't elected themselves
             successor.num_terms = 0  # Didn't serve a full elected term
+            successor.term_end = original_term_end
 
         return successor
 

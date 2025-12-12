@@ -162,12 +162,13 @@ def generate_valid_tritype(mbti, main_enneagram):
     return [main_enneagram, second, third]
 
 # Generate MBTI profile
-def generate_mbti_profile():
+def generate_mbti_profile(gender=None):
     mbti = random.choice(list(enneagram_wing_prevalence.keys()))
     main_enneagram = weighted_random_choice(enneagram_wing_prevalence[mbti])
     instinct_primary = random.choice(instinctual_variants)
     instinct_secondary = random.choice([v for v in instinctual_variants if v != instinct_primary])
-    gender = random.choice(genders)
+    if gender is None:
+        gender = random.choice(genders)
     tritype = generate_valid_tritype(mbti, main_enneagram)
     tritype_formatted = " ".join(tritype)
     return f"{gender} {mbti} {main_enneagram} {instinct_primary}/{instinct_secondary} {tritype_formatted}"
