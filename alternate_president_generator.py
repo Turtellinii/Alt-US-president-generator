@@ -356,10 +356,11 @@ class President:
             self.economic_score = random.randint(-100, 100)
         else:
             # Add individual variation to party scores
+            # Clamp to -100 to 100 range
             personal_social = random.randint(-25, 25)
             personal_economic = random.randint(-25, 25)
-            self.social_score = party.social_score + personal_social
-            self.economic_score = party.economic_score + personal_economic
+            self.social_score = max(-100, min(100, party.social_score + personal_social))
+            self.economic_score = max(-100, min(100, party.economic_score + personal_economic))
 
         # Generate life years
         # Birth year: election year - random(35-70)
@@ -558,6 +559,12 @@ class AlternateHistoryGenerator:
             # Shift party politics
             if year >= 1792:
                 self.shift_party_politics()
+
+                # Display current party political positions
+                active_parties_display = [p for p in self.parties if not p.dissolved]
+                print(f"\nCurrent party positions for {year} election:")
+                for party in active_parties_display:
+                    print(f"  {party}")
 
             # Check party dissolutions
             if year >= 1792:
