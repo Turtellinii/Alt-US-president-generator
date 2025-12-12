@@ -345,8 +345,15 @@ class President:
         # If dies in office, determine when
         self.death_year = None
         if self.dies_in_office:
-            # Die sometime during their term(s)
-            self.death_year = random.randint(self.term_start, self.term_end)
+            # If they serve 2 terms, they can only die in the second term
+            # (because if they died in the first term, they wouldn't be reelected)
+            if self.num_terms == 2:
+                # Die in second term only (years 5-8 of presidency)
+                second_term_start = self.term_start + 4
+                self.death_year = random.randint(second_term_start, self.term_end)
+            else:
+                # Single term - can die anytime during the term
+                self.death_year = random.randint(self.term_start, self.term_end)
             self.term_end = self.death_year
 
         # Generate political compass scores
