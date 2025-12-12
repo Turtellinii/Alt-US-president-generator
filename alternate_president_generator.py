@@ -237,27 +237,21 @@ def get_shift_range(score):
     Extreme positions have limited ability to shift further toward extremes,
     creating a natural tendency toward moderation.
     """
-    if -100 <= score <= -76:
-        # Very left: harder to go more left
-        return (-5, 20)
-    elif -75 <= score <= -51:
-        # Left: somewhat harder to go more left
+    if -100 <= score <= -67:
+        # Far left: harder to go more left
         return (-10, 20)
-    elif -50 <= score <= -26:
-        # Center-left: slightly harder to go more left
+    elif -66 <= score <= -34:
+        # Left: somewhat harder to go more left
         return (-15, 20)
-    elif -25 <= score <= 25:
+    elif -33 <= score <= 33:
         # Center: normal range
         return (-20, 20)
-    elif 26 <= score <= 50:
-        # Center-right: slightly harder to go more right
-        return (-20, 15)
-    elif 51 <= score <= 75:
+    elif 34 <= score <= 66:
         # Right: somewhat harder to go more right
+        return (-20, 15)
+    else:  # 67 to 100
+        # Far right: harder to go more right
         return (-20, 10)
-    else:  # 76 to 100
-        # Very right: harder to go more right
-        return (-20, 5)
 
 
 class Party:
@@ -285,9 +279,9 @@ class Party:
         color = random.choice(available_colors)
         cls.used_colors.add(color)
 
-        # New parties start moderate (±50 range) rather than extreme
-        social_score = random.randint(-50, 50)
-        economic_score = random.randint(-50, 50)
+        # New parties start in moderate range (±75) with some diversity
+        social_score = random.randint(-75, 75)
+        economic_score = random.randint(-75, 75)
 
         return cls(f"{color} Party", social_score, economic_score, year)
 
