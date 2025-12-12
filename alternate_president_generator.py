@@ -181,9 +181,10 @@ def get_eligible_states(birth_year):
 
     for state, admission_year in STATE_ADMISSION_DATES.items():
         if state not in ORIGINAL_13_COLONIES:
-            # State is available if person was born at least 15 years before admission
+            # State is available if person was born 15 years or less before admission
             # or born after admission
-            if birth_year <= admission_year - 15 or birth_year >= admission_year:
+            # Example: Indiana admitted 1816, eligible if born 1801 or later (1816 - 15 = 1801)
+            if birth_year >= admission_year - 15:
                 eligible.append(state)
 
     return eligible
@@ -382,10 +383,13 @@ class President:
         natural_death_year = self.birth_year + lifespan
 
         # If died in office, use that death year, otherwise use natural
+        # But ensure they live at least until after their presidency
         if self.dies_in_office:
             self.final_death_year = self.death_year
         else:
-            self.final_death_year = natural_death_year
+            # They must live at least one year after their term ends
+            min_death_year = self.completed_term_end + 1
+            self.final_death_year = max(natural_death_year, min_death_year)
 
         # Generate state of origin
         self.state = random.choice(get_eligible_states(self.birth_year))
