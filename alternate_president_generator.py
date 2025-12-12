@@ -231,6 +231,35 @@ def get_wealth_class(score):
         return "Elite"
 
 
+def get_shift_range(score):
+    """Get the shift range based on current political score
+
+    Extreme positions have limited ability to shift further toward extremes,
+    creating a natural tendency toward moderation.
+    """
+    if -100 <= score <= -76:
+        # Very left: harder to go more left
+        return (-5, 20)
+    elif -75 <= score <= -51:
+        # Left: somewhat harder to go more left
+        return (-10, 20)
+    elif -50 <= score <= -26:
+        # Center-left: slightly harder to go more left
+        return (-15, 20)
+    elif -25 <= score <= 25:
+        # Center: normal range
+        return (-20, 20)
+    elif 26 <= score <= 50:
+        # Center-right: slightly harder to go more right
+        return (-20, 15)
+    elif 51 <= score <= 75:
+        # Right: somewhat harder to go more right
+        return (-20, 10)
+    else:  # 76 to 100
+        # Very right: harder to go more right
+        return (-20, 5)
+
+
 class Party:
     """Represents a political party"""
     used_colors = set()
@@ -256,15 +285,25 @@ class Party:
         color = random.choice(available_colors)
         cls.used_colors.add(color)
 
-        social_score = random.randint(-100, 100)
-        economic_score = random.randint(-100, 100)
+        # New parties start moderate (±50 range) rather than extreme
+        social_score = random.randint(-50, 50)
+        economic_score = random.randint(-50, 50)
 
         return cls(f"{color} Party", social_score, economic_score, year)
 
     def shift_politics(self):
-        """Randomly shift party's political positions"""
-        social_shift = random.randint(-20, 20)
-        economic_shift = random.randint(-20, 20)
+        """Randomly shift party's political positions
+
+        Uses dynamic shift ranges based on current position to create
+        natural resistance to extreme positions.
+        """
+        # Get shift ranges based on current positions
+        social_min, social_max = get_shift_range(self.social_score)
+        economic_min, economic_max = get_shift_range(self.economic_score)
+
+        # Apply shifts with position-dependent ranges
+        social_shift = random.randint(social_min, social_max)
+        economic_shift = random.randint(economic_min, economic_max)
 
         self.social_score = max(-100, min(100, self.social_score + social_shift))
         self.economic_score = max(-100, min(100, self.economic_score + economic_shift))
