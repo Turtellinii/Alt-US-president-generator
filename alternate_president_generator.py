@@ -664,13 +664,6 @@ class AlternateHistoryGenerator:
             print(f"   ✗ Third term DENIED by voters")
             return False, False, None
         
-        # Now check for 4th term
-        # First check if they will die before the 4th term ends
-        fourth_term_end = president.term_end + 4
-        if president.final_death_year < fourth_term_end:
-            # They won't live long enough for a 4th term
-            return True, False, None
-        
         # Now attempt 4th term (40% chance)
         print(f"\n⚠️  {president.name} attempts to run for a FOURTH TERM!")
         if random.randint(1, 100) <= 40:
@@ -678,7 +671,18 @@ class AlternateHistoryGenerator:
             president.num_terms = 4
             president.term_end += 4
             president.completed_term_end = president.term_end
-            president.completed_term_end = president.term_end
+
+            # Check if they will die during the 4th term
+            fourth_term_start = president.term_end - 4 + 1
+            if president.final_death_year < president.term_end:
+                # They will die during the 4th term, before completing it
+                president.dies_in_office = True
+                president.death_year = president.final_death_year
+                president.death_cause = "Natural Causes" if random.randint(1, 2) == 1 else "Assassination"
+                president.term_end = president.death_year
+                print(f"\n💀 {president.name} dies during their fourth term in {president.death_year}")
+                print(f"   No authoritarian takeover possible")
+                return True, False, None
 
             # Determine authoritarian type based on which conditions are met
             # Priority system for more balanced regime distribution
