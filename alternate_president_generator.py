@@ -270,18 +270,24 @@ def check_authoritarian_tendency(president):
             reasons_met.append(1)
 
     # Condition 2: Specific MBTI + Enneagram combinations
-    target_combos = ['ENTJ 3w4 ', 'ESTJ 3w4 ', 'ESTP 3w4 ', 'ESFP 3w4', 'INTJ 3w4', 'ENTP 3w4', 'INTJ 5w6', 'ENTJ 5w6', 'ENTP 5w6', 'ESTP 7w8', 'ESFP 7w8', 'ENTJ 7w8', 'ENTP 7w8']
+    target_combos = [
+        'ENTJ 3w4 ', 'ESTJ 3w4 ', 'ESTP 3w4 ', 'ESFP 3w4', 'INTJ 3w4', 'ENTP 3w4',
+        'ENTJ 3w2', 'ESTP 3w2', 'ESFP 3w2', 'ENTP 3w2', 'ESTJ 3w2',
+        'INTJ 5w6', 'ENTJ 5w6', 'ENTP 5w6',
+        'ESTP 7w8', 'ESFP 7w8', 'ENTJ 7w8', 'ENTP 7w8',
+        '6w7 sx/so', '6w5 sx/so', '4w3 sx/so', '4w3 sx/sp'
+    ]
     for combo in target_combos:
         if combo in president.personality:
             reasons_met.append(2)
             break
 
-    # Condition 3: President's social score >= 67
-    if president.social_score >= 34:
+    # Condition 3: President's social score >= 40
+    if president.social_score >= 40:
         reasons_met.append(3)
 
-    # Condition 4: Party's social score >= 67 (if they have a party)
-    if president.party and president.party.social_score >= 34:
+    # Condition 4: Party's social score >= 45 (if they have a party)
+    if president.party and president.party.social_score >= 45:
         reasons_met.append(4)
 
     # Need 2 or more conditions to attempt extra terms
@@ -431,9 +437,10 @@ class President:
             self.economic_score = random.randint(-100, 100)
         else:
             # Add individual variation to party scores
+            # Wider variance allows for more diversity in authoritarian tendencies
             # Clamp to -100 to 100 range
-            personal_social = random.randint(-25, 25)
-            personal_economic = random.randint(-25, 25)
+            personal_social = random.randint(-40, 40)
+            personal_economic = random.randint(-40, 40)
             self.social_score = max(-100, min(100, party.social_score + personal_social))
             self.economic_score = max(-100, min(100, party.economic_score + personal_economic))
 
