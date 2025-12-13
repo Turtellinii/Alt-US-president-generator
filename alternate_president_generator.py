@@ -753,61 +753,51 @@ class AlternateHistoryGenerator:
             return False
 
     def generate_family_successor(self, dictator):
-        """Generate a family member to succeed a dictator"""
+        """Generate a family member to succeed a dictator
+
+        Generates a full president with all normal details, but overrides:
+        - Last name (same as dictator)
+        - State of origin (same as dictator)
+        - Party (None - dictators have no party)
+        - Wealth (equal to or greater than dictator)
+        """
         succession_year = dictator.death_year if dictator.dies_in_office else dictator.final_death_year
-        
-        # Create a full president object
-        successor = President(succession_year, dictator.party if dictator.party else None)
-        
-        # Override specific attributes to make them family
-        # Keep same last name and state
+
+        # Create a full president object with no party (dictators have no party affiliation)
+        successor = President(succession_year, party=None)
+
+        # Override name to keep family last name
         last_name = dictator.name.split()[1]
-        first_name_era = get_name_era(succession_year)
-        
-        # Always male for dictatorship family succession
-        first_name = random.choice(FIRST_NAMES_MALE[first_name_era])
+        first_name = successor.name.split()[0]  # Keep the randomly generated first name
         successor.name = f"{first_name} {last_name}"
-        successor.gender = "Male"
+
+        # Override state to match dictator
         successor.state = dictator.state
-        
-        # Make them younger than the previous dictator
-        # Birth year should be after the dictator's birth
-        age_difference = random.randint(20, 40)  # 20-40 years younger
-        successor.birth_year = dictator.birth_year + age_difference
-        
-        # Recalculate death year based on new birth year
-        # Use the same lifespan logic as normal presidents
-        if succession_year < 1800:
-            lifespan = random.randint(60, 80)
-        elif succession_year < 1851:
-            lifespan = random.randint(60, 85)
-        elif succession_year < 1900:
-            lifespan = random.randint(65, 90)
-        elif succession_year < 1951:
-            lifespan = random.randint(65, 95)
-        elif succession_year < 2001:
-            lifespan = random.randint(70, 100)
-        else:
-            lifespan = random.randint(70, 105)
-        
-        successor.final_death_year = successor.birth_year + lifespan
-        
+
+        # Override wealth to be equal to or greater than predecessor
+        # If dictator had wealth X, successor gets X to 10
+        min_wealth = dictator.wealth_score
+        successor.wealth_score = random.randint(min_wealth, 10)
+        successor.wealth_class = get_wealth_class(successor.wealth_score)
+
         # Dictator rules until natural death - no predetermined death in office
         successor.dies_in_office = False
         successor.death_year = None
         successor.death_cause = None
-        
-        # Set term details
+
+        # Set term details for dictator
         successor.term_start = succession_year + 1
         successor.term_end = succession_year + 50  # Placeholder, will rule until death
         successor.completed_term_end = successor.term_end
         successor.num_terms = 999  # Special marker for dictator
-        
+
         print(f"\n👑 New Dictator: {successor.name} (family member)")
         print(f"   Born: {successor.birth_year}")
         print(f"   From: {successor.state}")
+        print(f"   Gender: {successor.gender}")
+        print(f"   Wealth: {successor.wealth_class} (Score: {successor.wealth_score}/10)")
         print(f"   Personality: {successor.personality}")
-        
+
         return successor
 
     def check_revolution(self, year):
