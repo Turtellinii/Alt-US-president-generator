@@ -282,12 +282,12 @@ def check_authoritarian_tendency(president):
             reasons_met.append(2)
             break
 
-    # Condition 3: President's social score >= 40
-    if president.social_score >= 40:
+    # Condition 3: President's social score >= 34
+    if president.social_score >= 34:
         reasons_met.append(3)
 
-    # Condition 4: Party's social score >= 45 (if they have a party)
-    if president.party and president.party.social_score >= 45:
+    # Condition 4: Party's social score >= 51 (if they have a party)
+    if president.party and president.party.social_score >= 51:
         reasons_met.append(4)
 
     # Need 2 or more conditions to attempt extra terms
@@ -680,16 +680,58 @@ class AlternateHistoryGenerator:
             president.completed_term_end = president.term_end
             president.completed_term_end = president.term_end
 
-            # Determine authoritarian type based on reasons
-            if 3 in reasons and 4 in reasons:
-                auth_type = 'hybrid'
-            elif 4 in reasons:
-                auth_type = 'one_party'
-            elif 3 in reasons:
-                auth_type = 'dictatorship'
+            # Determine authoritarian type based on which conditions are met
+            # Priority system for more balanced regime distribution
+            if 1 in reasons:
+                # Condition 1 (8w7/8w9 personality) takes precedence
+                if 3 in reasons:
+                    # 1 + 3 (with or without 4) = Dictatorship
+                    # Strong personality + high personal score = personal power grab
+                    auth_type = 'dictatorship'
+                elif 4 in reasons:
+                    # 1 + 4 (without 3) = Hybrid
+                    # Strong personality + party support = hybrid regime
+                    auth_type = 'hybrid'
+                else:
+                    # Shouldn't happen (need 2+ conditions), but default
+                    auth_type = 'dictatorship'
+            elif 2 in reasons:
+                # Condition 2 (MBTI combo)
+                if 3 in reasons and 4 in reasons:
+                    # 2 + 3 + 4 = Compare scores
+                    # MBTI combo + both scores: stronger score determines type
+                    if president.social_score > president.party.social_score:
+                        auth_type = 'dictatorship'
+                    else:
+                        auth_type = 'hybrid'
+                elif 3 in reasons:
+                    # 2 + 3 (without 4) = Dictatorship
+                    # MBTI combo + personal score = personal authoritarianism
+                    auth_type = 'dictatorship'
+                elif 4 in reasons:
+                    # 2 + 4 (without 3) = One-party
+                    # MBTI combo + party score = party-driven authoritarianism
+                    auth_type = 'one_party'
+                else:
+                    # Shouldn't happen
+                    auth_type = 'dictatorship'
             else:
-                # Default to dictatorship if neither social score triggered it
-                auth_type = 'dictatorship'
+                # Only conditions 3 and/or 4 (no personality conditions)
+                if 3 in reasons and 4 in reasons:
+                    # Both scores, no personality - compare strengths
+                    if president.social_score > president.party.social_score:
+                        auth_type = 'dictatorship'
+                    else:
+                        auth_type = 'hybrid'
+                elif 3 in reasons:
+                    # Only personal score
+                    auth_type = 'dictatorship'
+                elif 4 in reasons:
+                    # Only party score
+                    auth_type = 'one_party'
+                else:
+                    # Shouldn't happen (need 2+ conditions)
+                    auth_type = 'dictatorship'
 
             return True, True, auth_type
         else:
