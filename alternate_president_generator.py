@@ -608,7 +608,7 @@ class AlternateHistoryGenerator:
 
         return successor
 
-    def attempt_term_extension(self, president):
+    def attempt_term_extension(self, president, current_year):
         """Handle president attempting 3rd and 4th terms
 
         Returns tuple: (got_third_term, got_fourth_term, authoritarian_type)
@@ -616,15 +616,15 @@ class AlternateHistoryGenerator:
         # CRITICAL: Check if president will die before completing a 3rd term
         # We must check final_death_year, not just dies_in_office
         third_term_end = president.term_end + 4
-        
+
         # If president died during their first 2 terms, they can't attempt extensions
         if president.dies_in_office:
             return False, False, None
-        
+
         # If president will die before the 3rd term ends, they can't attempt it
         if president.final_death_year < third_term_end:
             return False, False, None
-        
+
         attempts, reasons = check_authoritarian_tendency(president)
 
         if not attempts:
@@ -811,6 +811,7 @@ class AlternateHistoryGenerator:
         return successor
 
     def check_revolution(self, year):
+<<<<<<< HEAD
         """Check for revolution attempt and potential success"""
         # Debug output
         if self.regime_start_year is not None:
@@ -828,6 +829,16 @@ class AlternateHistoryGenerator:
                 
                 print(f"\n🎲 Revolution check (Year {year})...")
                 print(f"   Attempt chance: {self.revolution_attempt_chance}%")
+=======
+        """Check for revolution attempt and potential success
+
+        This should be called every 4 years (every election cycle)
+        """
+        # Only check if at least 4 years have passed since regime started
+        if self.years_since_regime_check >= 4:
+            print(f"\n🎲 Revolution check (Year {year})...")
+            print(f"   Attempt chance: {self.revolution_attempt_chance}%")
+>>>>>>> c6451bd (Fix authoritarian regime mechanics bugs)
 
                 # Check if revolution is attempted
                 if random.randint(1, 100) <= self.revolution_attempt_chance:
@@ -848,6 +859,7 @@ class AlternateHistoryGenerator:
                             print(f"   {self.regime_party.name} has been ELIMINATED")
                             self.regime_party.dissolved = True
 
+<<<<<<< HEAD
                         # Reset regime
                         self.is_authoritarian = False
                         self.regime_type = None
@@ -857,6 +869,16 @@ class AlternateHistoryGenerator:
                         self.revolution_success_chance = 20
                         self.regime_start_year = None
                         self.last_revolution_check_year = None
+=======
+                    # Reset regime
+                    self.is_authoritarian = False
+                    self.regime_type = None
+                    self.regime_party = None
+                    self.current_dictator = None
+                    self.revolution_attempt_chance = 10
+                    self.revolution_success_chance = 20
+                    self.years_since_regime_check = 0
+>>>>>>> c6451bd (Fix authoritarian regime mechanics bugs)
 
                         # Form new parties
                         num_parties = random.randint(2, 4)
@@ -875,9 +897,17 @@ class AlternateHistoryGenerator:
                 else:
                     print(f"   No revolution attempted this cycle")
 
+<<<<<<< HEAD
                 # Increase attempt chance for next cycle
                 self.revolution_attempt_chance = min(100, self.revolution_attempt_chance + 10)
             
+=======
+            # Increase attempt chance for next cycle
+            self.revolution_attempt_chance = min(100, self.revolution_attempt_chance + 10)
+
+        # Increment by 4 since elections happen every 4 years
+        self.years_since_regime_check += 4
+>>>>>>> c6451bd (Fix authoritarian regime mechanics bugs)
         return False  # No revolution or failed revolution
 
     def run_simulation(self):
@@ -893,7 +923,7 @@ class AlternateHistoryGenerator:
         print(first_president)
 
         # Check for term extension attempt
-        got_third, got_fourth, auth_type = self.attempt_term_extension(first_president)
+        got_third, got_fourth, auth_type = self.attempt_term_extension(first_president, first_president.term_end)
 
         # Next election happens in the year the term ends
         next_election_year = first_president.completed_term_end
@@ -904,6 +934,16 @@ class AlternateHistoryGenerator:
             next_election_year = successor.term_end
             print(f"\nSuccessor for {first_president.name}:")
             print(successor)
+
+            # Check if successor should attempt term extensions (if they got 2 full elected terms)
+            if successor.num_terms == 2:
+                got_third_succ, got_fourth_succ, auth_type_succ = self.attempt_term_extension(successor, successor.term_end)
+                if got_fourth_succ and auth_type_succ:
+                    if not self.attempt_authoritarian_takeover(successor, auth_type_succ):
+                        # Takeover failed
+                        pass
+                # Update next election year if successor got extensions
+                next_election_year = successor.term_end
 
         # Handle authoritarian takeover if president got 4th term
         if got_fourth and auth_type:
@@ -918,6 +958,7 @@ class AlternateHistoryGenerator:
         # Continue elections until 2024
         while next_election_year <= 2024:
             year = next_election_year
+            revolution_succeeded = False
 
             # Check for revolution if under authoritarian regime
             if self.is_authoritarian:
@@ -926,7 +967,11 @@ class AlternateHistoryGenerator:
                 if revolution_succeeded:
                     # Revolution succeeded, hold special election
                     print(f"\n🗳️  SPECIAL ELECTION in {year}")
+<<<<<<< HEAD
                     self.scheduled_election_year = None
+=======
+                    revolution_succeeded = True
+>>>>>>> c6451bd (Fix authoritarian regime mechanics bugs)
                 elif self.regime_type in ['dictatorship', 'hybrid']:
                     # Under dictatorship/hybrid, check if dictator dies
                     if self.current_dictator and year >= self.current_dictator.final_death_year:
@@ -1066,6 +1111,7 @@ class AlternateHistoryGenerator:
                 else:
                     selected_party = random.choice(active_parties)
 
+<<<<<<< HEAD
                 # Check if we're at a scheduled election or just generating a president
                 # For regular democracies, always generate. For one-party, check schedule.
                 should_hold_election = True
@@ -1123,6 +1169,23 @@ class AlternateHistoryGenerator:
                         president = self.generate_president(year, selected_party)
                         self.presidents.append(president)
                         print(president)
+=======
+                # Generate president
+                print(f"\nGenerating president for {year} election...")
+                president = self.generate_president(year, selected_party)
+                self.presidents.append(president)
+                print(president)
+
+                # Check for term extension attempt (only if completed 2 terms and no revolution)
+                if president.num_terms == 2 and not revolution_succeeded:
+                    got_third, got_fourth, auth_type = self.attempt_term_extension(president, president.term_end)
+
+                    # Handle authoritarian takeover if president got 4th term
+                    if got_fourth and auth_type:
+                        if not self.attempt_authoritarian_takeover(president, auth_type):
+                            # Takeover failed, next election proceeds normally
+                            pass
+>>>>>>> c6451bd (Fix authoritarian regime mechanics bugs)
 
                 # Next election happens in the year the term ends
                 # For one-party states, we need to handle this differently
@@ -1151,6 +1214,16 @@ class AlternateHistoryGenerator:
                         next_election_year = successor.term_end
                     print(f"\nSuccessor for {last_president.name}:")
                     print(successor)
+
+                    # Check if successor should attempt term extensions (if they got 2 full elected terms and no revolution)
+                    if successor.num_terms == 2 and not revolution_succeeded:
+                        got_third_succ, got_fourth_succ, auth_type_succ = self.attempt_term_extension(successor, successor.term_end)
+                        if got_fourth_succ and auth_type_succ:
+                            if not self.attempt_authoritarian_takeover(successor, auth_type_succ):
+                                # Takeover failed
+                                pass
+                        # Update next election year if successor got extensions
+                        next_election_year = successor.term_end
 
         # Print summary
         self.print_summary()
