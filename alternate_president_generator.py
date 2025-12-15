@@ -610,15 +610,6 @@ class AlternateHistoryGenerator:
                     print(f"\n🤝 {party1.name} and {party2.name} have MERGED into {merged_name}")
                     print(f"   New position: Social {merged_social:+d}, Economic {merged_economic:+d}")
 
-                    # Update any presidents who belonged to the old parties
-                    for president in self.presidents:
-                        if president.party == party1 or president.party == party2:
-                            president.party = merged_party
-
-                    # Update regime party if applicable
-                    if self.regime_party == party1 or self.regime_party == party2:
-                        self.regime_party = merged_party
-
                     # Dissolve old parties
                     party1.dissolved = True
                     party2.dissolved = True
