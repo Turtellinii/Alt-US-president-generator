@@ -759,6 +759,17 @@ class AlternateHistoryGenerator:
             self.regime_start_year = president.term_end
             self.last_revolution_check_year = None
 
+            # For dictatorships and hybrid regimes, check if dictator is assassinated
+            if auth_type in ['dictatorship', 'hybrid']:
+                assassination_roll = random.randint(1, 45)
+                if assassination_roll <= 8:
+                    # Will be assassinated
+                    natural_death_year = president.final_death_year
+                    # Assassination happens sometime between takeover and natural death
+                    president.final_death_year = random.randint(president.term_end + 1, natural_death_year)
+                    president.death_cause = "Assassination"
+                    print(f"   ⚠️  {president.name} will be ASSASSINATED in {president.final_death_year}")
+
             if auth_type == 'one_party':
                 # One-party state: eliminate all other parties
                 self.regime_party = president.party
@@ -819,6 +830,8 @@ class AlternateHistoryGenerator:
         - State of origin (same as dictator)
         - Party (None - dictators have no party)
         - Wealth (equal to or greater than dictator)
+        - Political scores (based on predecessor with variance)
+        - Assassination chance (8/45)
         """
         succession_year = dictator.death_year if dictator.dies_in_office else dictator.final_death_year
 
@@ -839,10 +852,11 @@ class AlternateHistoryGenerator:
         successor.wealth_score = random.randint(min_wealth, 10)
         successor.wealth_class = get_wealth_class(successor.wealth_score)
 
-        # Dictator rules until natural death - no predetermined death in office
-        successor.dies_in_office = False
-        successor.death_year = None
-        successor.death_cause = None
+        # Generate political scores based on predecessor with variance
+        political_variance_social = random.randint(-50, 50)
+        political_variance_economic = random.randint(-50, 50)
+        successor.social_score = max(-100, min(100, dictator.social_score + political_variance_social))
+        successor.economic_score = max(-100, min(100, dictator.economic_score + political_variance_economic))
 
         # Set term details for dictator
         successor.term_start = succession_year + 1
@@ -850,12 +864,41 @@ class AlternateHistoryGenerator:
         successor.completed_term_end = successor.term_end
         successor.num_terms = 999  # Special marker for dictator
 
-        print(f"\n👑 New Dictator: {successor.name} (family member)")
-        print(f"   Born: {successor.birth_year}")
-        print(f"   From: {successor.state}")
-        print(f"   Gender: {successor.gender}")
-        print(f"   Wealth: {successor.wealth_class} (Score: {successor.wealth_score}/10)")
-        print(f"   Personality: {successor.personality}")
+        # Determine if assassinated (8/45 chance)
+        assassination_roll = random.randint(1, 45)
+        if assassination_roll <= 8:
+            # Will be assassinated
+            natural_death_year = successor.final_death_year
+            # Assassination happens sometime between assuming power and natural death
+            successor.final_death_year = random.randint(successor.term_start, natural_death_year)
+            successor.death_cause = "Assassination"
+
+            print(f"\n👑 New Dictator: {successor.name} (family member)")
+            print(f"   Assumed Power: {successor.term_start}")
+            print(f"   Born: {successor.birth_year}")
+            print(f"   From: {successor.state}")
+            print(f"   Gender: {successor.gender}")
+            print(f"   Political Position: Social {successor.social_score:+d}, Economic {successor.economic_score:+d}")
+            print(f"   Wealth: {successor.wealth_class} (Score: {successor.wealth_score}/10)")
+            print(f"   Life: {successor.birth_year}-{successor.final_death_year} ({successor.final_death_year - successor.birth_year} years) - ASSASSINATED")
+            print(f"   Personality: {successor.personality}")
+        else:
+            # Dies naturally
+            successor.death_cause = None
+
+            print(f"\n👑 New Dictator: {successor.name} (family member)")
+            print(f"   Assumed Power: {successor.term_start}")
+            print(f"   Born: {successor.birth_year}")
+            print(f"   From: {successor.state}")
+            print(f"   Gender: {successor.gender}")
+            print(f"   Political Position: Social {successor.social_score:+d}, Economic {successor.economic_score:+d}")
+            print(f"   Wealth: {successor.wealth_class} (Score: {successor.wealth_score}/10)")
+            print(f"   Life: {successor.birth_year}-{successor.final_death_year} ({successor.final_death_year - successor.birth_year} years)")
+            print(f"   Personality: {successor.personality}")
+
+        # Dictator rules until natural death or assassination - no predetermined death in office
+        successor.dies_in_office = False
+        successor.death_year = None
 
         return successor
 
