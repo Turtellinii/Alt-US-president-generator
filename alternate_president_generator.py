@@ -581,11 +581,11 @@ class AlternateHistoryGenerator:
                 party1 = active_parties[i]
                 party2 = active_parties[j]
 
-                # Check if within 25 points on both axes
+                # Check if within 20 points on both axes
                 social_diff = abs(party1.social_score - party2.social_score)
                 economic_diff = abs(party1.economic_score - party2.economic_score)
 
-                if social_diff <= 25 and economic_diff <= 25:
+                if social_diff <= 20 and economic_diff <= 20:
                     # Parties should merge
                     # Extract color names (remove " Party" suffix)
                     color1 = party1.name.replace(" Party", "")
@@ -1088,7 +1088,11 @@ class AlternateHistoryGenerator:
                             # Pure dictatorship: family succession
                             self.current_dictator = self.generate_family_successor(self.current_dictator)
                             self.presidents.append(self.current_dictator)
-                            next_election_year = year + 4
+
+                            # Calculate next revolution check year (aligned to regime_start_year)
+                            years_since_regime = year - self.regime_start_year
+                            years_to_next_check = 4 - (years_since_regime % 4) if years_since_regime % 4 != 0 else 4
+                            next_election_year = year + years_to_next_check
                             continue
                         else:
                             # Hybrid: dictator's death triggers transition to one-party elections
