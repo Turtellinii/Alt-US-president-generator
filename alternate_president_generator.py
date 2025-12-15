@@ -951,6 +951,59 @@ class AlternateHistoryGenerator:
 
         return successor
 
+    def check_democracy_restoration(self, year):
+        """Check if authoritarian leader voluntarily restores democracy"""
+        # Get current leader's social score
+        leader_social_score = None
+        leader_name = None
+
+        if self.regime_type in ['dictatorship', 'hybrid'] and self.current_dictator:
+            leader_social_score = self.current_dictator.social_score
+            leader_name = self.current_dictator.name
+        elif self.regime_type == 'one_party':
+            # Find the current president in one-party state
+            # This would be the most recent president
+            if self.presidents:
+                current_president = self.presidents[-1]
+                leader_social_score = current_president.social_score
+                leader_name = current_president.name
+
+        # Only check if leader has negative social score
+        if leader_social_score is not None and leader_social_score < 0:
+            restoration_chance = abs(leader_social_score) // 2
+
+            print(f"\n🕊️  Democracy restoration check (Year {year})...")
+            print(f"   Leader: {leader_name} (Social Score: {leader_social_score:+d})")
+            print(f"   Restoration chance: {restoration_chance}%")
+
+            if random.randint(1, 100) <= restoration_chance:
+                print(f"   ✓ {leader_name} has voluntarily RESTORED DEMOCRACY!")
+                print(f"   🎉 DEMOCRACY RESTORED!")
+
+                # Reset regime (peaceful transition - no imprisonments)
+                self.is_authoritarian = False
+                self.regime_type = None
+                self.regime_party = None
+                self.current_dictator = None
+                self.revolution_attempt_chance = 10
+                self.revolution_success_chance = 10
+                self.regime_start_year = None
+                self.last_revolution_check_year = None
+
+                # Form new parties
+                num_parties = random.randint(2, 4)
+                print(f"\n   {num_parties} new political parties formed:")
+                for _ in range(num_parties):
+                    new_party = Party.generate_new_party(year)
+                    self.parties.append(new_party)
+                    print(f"     {new_party}")
+
+                return True  # Democracy restored
+            else:
+                print(f"   ✗ Democracy not restored")
+
+        return False  # No restoration
+
     def check_revolution(self, year):
         """Check for revolution attempt and potential success"""
         # Debug output
@@ -966,6 +1019,10 @@ class AlternateHistoryGenerator:
             # Only check if we haven't already checked this year
             if year != self.last_revolution_check_year:
                 self.last_revolution_check_year = year
+
+                # First check for top-down democracy restoration
+                if self.check_democracy_restoration(year):
+                    return True  # Democracy restored peacefully
 
                 print(f"\n🎲 Revolution check (Year {year})...")
                 print(f"   Attempt chance: {self.revolution_attempt_chance}%")
@@ -995,7 +1052,7 @@ class AlternateHistoryGenerator:
                         self.regime_party = None
                         self.current_dictator = None
                         self.revolution_attempt_chance = 10
-                        self.revolution_success_chance = 20
+                        self.revolution_success_chance = 10
                         self.regime_start_year = None
                         self.last_revolution_check_year = None
 
@@ -1082,7 +1139,10 @@ class AlternateHistoryGenerator:
                 elif self.regime_type in ['dictatorship', 'hybrid']:
                     # Under dictatorship/hybrid, check if dictator dies
                     if self.current_dictator and year >= self.current_dictator.final_death_year:
-                        print(f"\n💀 Dictator {self.current_dictator.name} has died")
+                        if self.current_dictator.death_cause == "Assassination":
+                            print(f"\n💀 Dictator {self.current_dictator.name} has been ASSASSINATED")
+                        else:
+                            print(f"\n💀 Dictator {self.current_dictator.name} has died")
 
                         if self.regime_type == 'dictatorship':
                             # Pure dictatorship: family succession
