@@ -1148,8 +1148,10 @@ class AlternateHistoryGenerator:
                     if self.current_dictator and year >= self.current_dictator.final_death_year:
                         if self.current_dictator.death_cause == "Assassination":
                             print(f"\n💀 Dictator {self.current_dictator.name} has been ASSASSINATED")
+                            print(f"   Life: {self.current_dictator.birth_year}-{self.current_dictator.final_death_year} ({self.current_dictator.final_death_year - self.current_dictator.birth_year} years)")
                         else:
                             print(f"\n💀 Dictator {self.current_dictator.name} has died")
+                            print(f"   Life: {self.current_dictator.birth_year}-{self.current_dictator.final_death_year} ({self.current_dictator.final_death_year - self.current_dictator.birth_year} years)")
 
                         if self.regime_type == 'dictatorship':
                             # Pure dictatorship: family succession
@@ -1320,7 +1322,13 @@ class AlternateHistoryGenerator:
                             # Handle authoritarian takeover if got 4th term
                             if got_fourth and auth_type:
                                 if self.attempt_authoritarian_takeover(sitting_president, auth_type):
-                                    next_election_year = sitting_president.completed_term_end + 4
+                                    # For dictatorships/hybrids, check if dictator will die before next revolution check
+                                    if auth_type in ['dictatorship', 'hybrid'] and sitting_president.final_death_year < sitting_president.completed_term_end + 4:
+                                        # Dictator will be assassinated before next revolution check
+                                        next_election_year = sitting_president.final_death_year
+                                    else:
+                                        # Jump to next revolution check (4 years after takeover)
+                                        next_election_year = sitting_president.completed_term_end + 4
                                     continue
 
                             # Set next election to when extended term ends
