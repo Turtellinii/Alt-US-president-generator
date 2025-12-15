@@ -953,13 +953,15 @@ class AlternateHistoryGenerator:
 
     def check_democracy_restoration(self, year):
         """Check if authoritarian leader voluntarily restores democracy"""
-        # Get current leader's social score
+        # Get current leader's social score and personality
         leader_social_score = None
         leader_name = None
+        leader_personality = None
 
         if self.regime_type in ['dictatorship', 'hybrid'] and self.current_dictator:
             leader_social_score = self.current_dictator.social_score
             leader_name = self.current_dictator.name
+            leader_personality = self.current_dictator.personality
         elif self.regime_type == 'one_party':
             # Find the current president in one-party state
             # This would be the most recent president
@@ -967,6 +969,11 @@ class AlternateHistoryGenerator:
                 current_president = self.presidents[-1]
                 leader_social_score = current_president.social_score
                 leader_name = current_president.name
+                leader_personality = current_president.personality
+
+        # Check if leader has 8w7 or 8w9 enneagram (too power-hungry to restore democracy)
+        if leader_personality and ('8w7' in leader_personality or '8w9' in leader_personality):
+            return False  # 8w7 and 8w9 types never voluntarily give up power
 
         # Only check if leader has negative social score
         if leader_social_score is not None and leader_social_score < 0:
