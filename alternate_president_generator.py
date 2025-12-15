@@ -449,19 +449,19 @@ class President:
         age_at_election = random.randint(35, 70)
         self.birth_year = election_year - age_at_election
 
-        # Death year based on era
+        # Death year based on era (lowered minimum lifespans)
         if election_year < 1800:
-            lifespan = random.randint(60, 80)
+            lifespan = random.randint(55, 80)
         elif election_year < 1851:
-            lifespan = random.randint(60, 85)
+            lifespan = random.randint(55, 85)
         elif election_year < 1900:
-            lifespan = random.randint(65, 90)
+            lifespan = random.randint(60, 90)
         elif election_year < 1951:
-            lifespan = random.randint(65, 95)
+            lifespan = random.randint(60, 95)
         elif election_year < 2001:
-            lifespan = random.randint(70, 100)
+            lifespan = random.randint(65, 100)
         else:
-            lifespan = random.randint(70, 105)
+            lifespan = random.randint(65, 105)
 
         natural_death_year = self.birth_year + lifespan
 
@@ -530,7 +530,7 @@ class AlternateHistoryGenerator:
         self.regime_party = None  # The ruling party (if applicable)
         self.current_dictator = None  # Current dictator (if applicable)
         self.revolution_attempt_chance = 10  # Starts at 10%
-        self.revolution_success_chance = 20  # Starts at 20%
+        self.revolution_success_chance = 10  # Starts at 10%
         self.regime_start_year = None  # Year the regime was established
         self.last_revolution_check_year = None  # Last year a revolution check was performed
         self.scheduled_election_year = None  # For one-party states: when the next election is scheduled
