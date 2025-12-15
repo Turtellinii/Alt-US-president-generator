@@ -452,18 +452,28 @@ class President:
         # Death year based on era (lowered minimum lifespans)
         if election_year < 1800:
             lifespan = random.randint(55, 80)
+            lifespan_range = "55-80 (< 1800)"
         elif election_year < 1851:
             lifespan = random.randint(55, 85)
+            lifespan_range = "55-85 (< 1851)"
         elif election_year < 1900:
             lifespan = random.randint(60, 90)
+            lifespan_range = "60-90 (< 1900)"
         elif election_year < 1951:
             lifespan = random.randint(60, 95)
+            lifespan_range = "60-95 (< 1951)"
         elif election_year < 2001:
             lifespan = random.randint(65, 100)
+            lifespan_range = "65-100 (< 2001)"
         else:
             lifespan = random.randint(65, 105)
+            lifespan_range = "65-105 (>= 2001)"
 
         natural_death_year = self.birth_year + lifespan
+
+        # Debug logging for dictator successors
+        if party is None and not is_first_president:
+            print(f"[DEBUG SUCCESSOR] election_year={election_year}, birth_year={self.birth_year}, lifespan={lifespan} (range: {lifespan_range}), natural_death={natural_death_year}")
 
         # If died in office, use that death year, otherwise use natural
         # But ensure they live at least until after their presidency
@@ -884,8 +894,41 @@ class AlternateHistoryGenerator:
         """
         succession_year = dictator.death_year if dictator.dies_in_office else dictator.final_death_year
 
+        print(f"[DEBUG] Generating successor for {dictator.name} who died in {dictator.final_death_year}")
+        print(f"[DEBUG] succession_year = {succession_year}")
+
         # Create a full president object with no party (dictators have no party affiliation)
         successor = President(succession_year, party=None)
+
+        # Recalculate lifespan to ensure it matches the era when they assume power
+        # This prevents issues where succession_year might be from an earlier era
+        actual_power_year = succession_year + 1
+        if actual_power_year < 1800:
+            min_lifespan = 55
+            max_lifespan = 80
+        elif actual_power_year < 1851:
+            min_lifespan = 55
+            max_lifespan = 85
+        elif actual_power_year < 1900:
+            min_lifespan = 60
+            max_lifespan = 90
+        elif actual_power_year < 1951:
+            min_lifespan = 60
+            max_lifespan = 95
+        elif actual_power_year < 2001:
+            min_lifespan = 65
+            max_lifespan = 100
+        else:
+            min_lifespan = 65
+            max_lifespan = 105
+
+        # Check if current lifespan is below minimum for this era
+        current_lifespan = successor.final_death_year - successor.birth_year
+        if current_lifespan < min_lifespan:
+            print(f"[DEBUG] Adjusting lifespan from {current_lifespan} to minimum {min_lifespan} for era {actual_power_year}")
+            # Recalculate with proper minimum
+            new_lifespan = random.randint(min_lifespan, max_lifespan)
+            successor.final_death_year = successor.birth_year + new_lifespan
 
         # Override name to keep family last name
         last_name = dictator.name.split()[1]
