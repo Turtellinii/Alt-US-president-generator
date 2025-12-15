@@ -798,10 +798,16 @@ class AlternateHistoryGenerator:
         else:
             print(f"   ✗ TAKEOVER FAILED!")
             print(f"   {president.name} has been IMPRISONED")
-            print(f"   {president.party.name} has been ELIMINATED")
 
-            # Eliminate the president's party
-            president.party.dissolved = True
+            # Only eliminate party if they were complicit in the regime attempt
+            # Dictatorships are personal power grabs - party not necessarily involved
+            # One-party and hybrid regimes require party involvement
+            if auth_type in ['one_party', 'hybrid']:
+                print(f"   {president.party.name} has been ELIMINATED")
+                president.party.dissolved = True
+            else:
+                # Dictatorship attempt - party survives and disavows the president
+                print(f"   {president.party.name} disavows {president.name}")
 
             return False
 
