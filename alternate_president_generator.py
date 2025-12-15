@@ -821,6 +821,7 @@ class AlternateHistoryGenerator:
             # For dictatorships and hybrid regimes, check if dictator is assassinated
             if auth_type in ['dictatorship', 'hybrid']:
                 assassination_roll = random.randint(1, 45)
+                print(f"[DEBUG] Assassination roll for {president.name}: {assassination_roll}/45 (assassinated if <= 8)")
                 if assassination_roll <= 8:
                     # Will be assassinated
                     natural_death_year = president.final_death_year
@@ -958,6 +959,7 @@ class AlternateHistoryGenerator:
 
         # Determine if assassinated (8/45 chance)
         assassination_roll = random.randint(1, 45)
+        print(f"[DEBUG] Assassination roll for {successor.name}: {assassination_roll}/45 (assassinated if <= 8)")
         if assassination_roll <= 8:
             # Will be assassinated
             natural_death_year = successor.final_death_year
