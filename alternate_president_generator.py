@@ -571,6 +571,64 @@ class AlternateHistoryGenerator:
             if not party.dissolved and party.check_dissolution(year):
                 print(f"\n{party.name} has dissolved after {year - party.last_in_power} years out of power.")
 
+    def check_party_mergers(self, year):
+        """Check if any parties should merge due to political similarity"""
+        active_parties = [p for p in self.parties if not p.dissolved]
+
+        # Check all pairs of parties
+        for i in range(len(active_parties)):
+            for j in range(i + 1, len(active_parties)):
+                party1 = active_parties[i]
+                party2 = active_parties[j]
+
+                # Check if within 25 points on both axes
+                social_diff = abs(party1.social_score - party2.social_score)
+                economic_diff = abs(party1.economic_score - party2.economic_score)
+
+                if social_diff <= 25 and economic_diff <= 25:
+                    # Parties should merge
+                    # Extract color names (remove " Party" suffix)
+                    color1 = party1.name.replace(" Party", "")
+                    color2 = party2.name.replace(" Party", "")
+                    merged_name = f"{color1}-{color2} Party"
+
+                    # Calculate average scores
+                    merged_social = (party1.social_score + party2.social_score) // 2
+                    merged_economic = (party1.economic_score + party2.economic_score) // 2
+
+                    # Create merged party
+                    merged_party = Party(merged_name, merged_social, merged_economic, year)
+
+                    # Take the most recent last_in_power
+                    if party1.last_in_power is not None and party2.last_in_power is not None:
+                        merged_party.last_in_power = max(party1.last_in_power, party2.last_in_power)
+                    elif party1.last_in_power is not None:
+                        merged_party.last_in_power = party1.last_in_power
+                    elif party2.last_in_power is not None:
+                        merged_party.last_in_power = party2.last_in_power
+
+                    print(f"\n🤝 {party1.name} and {party2.name} have MERGED into {merged_name}")
+                    print(f"   New position: Social {merged_social:+d}, Economic {merged_economic:+d}")
+
+                    # Update any presidents who belonged to the old parties
+                    for president in self.presidents:
+                        if president.party == party1 or president.party == party2:
+                            president.party = merged_party
+
+                    # Update regime party if applicable
+                    if self.regime_party == party1 or self.regime_party == party2:
+                        self.regime_party = merged_party
+
+                    # Dissolve old parties
+                    party1.dissolved = True
+                    party2.dissolved = True
+
+                    # Add merged party
+                    self.parties.append(merged_party)
+
+                    # Only merge one pair per cycle to avoid complex cascading
+                    return
+
     def generate_president(self, year, party=None, is_successor=False, is_first_president=False):
         """Generate a new president"""
         president = President(year, party, is_successor, is_first_president)
@@ -1149,6 +1207,10 @@ class AlternateHistoryGenerator:
                         print(f"\nCurrent party positions for {year} election:")
                         for party in active_parties_display:
                             print(f"  {party}")
+
+                # Check party mergers (only if not authoritarian)
+                if year >= 1792 and not self.is_authoritarian:
+                    self.check_party_mergers(year)
 
                 # Check party dissolutions (only if not authoritarian)
                 if year >= 1792 and not self.is_authoritarian:
