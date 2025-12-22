@@ -634,9 +634,9 @@ class AlternateHistoryGenerator:
         """Generate a new president"""
         president = President(year, party, is_successor, is_first_president)
 
-        # Update party's last_in_power
+        # Update party's last_in_power to when they leave office (term end)
         if party:
-            party.last_in_power = year
+            party.last_in_power = president.completed_term_end
 
         return president
 
