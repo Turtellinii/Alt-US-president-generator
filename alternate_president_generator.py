@@ -901,8 +901,25 @@ class AlternateHistoryGenerator:
         # Create a full president object with no party (dictators have no party affiliation)
         successor = President(succession_year, party=None)
 
-        # Recalculate lifespan to ensure it matches the era when they assume power
-        # This prevents issues where succession_year might be from an earlier era
+        # Override birth year to make successor younger (family member)
+        # Successor should be at least 15 years younger than dictator
+        # and can be as young as 15 when assuming power
+        dictator_age_at_death = dictator.final_death_year - dictator.birth_year
+        max_successor_age = dictator_age_at_death - 15  # At least 15 years younger
+        min_successor_age = 15  # Can be as young as 15
+
+        # Ensure we have a valid range
+        if max_successor_age < min_successor_age:
+            # Dictator died very young, use minimum age
+            successor_age = min_successor_age
+        else:
+            successor_age = random.randint(min_successor_age, max_successor_age)
+
+        # Recalculate birth year based on new age
+        successor.birth_year = succession_year - successor_age
+        print(f"[DEBUG] Successor age at assumption: {successor_age} (dictator was {dictator_age_at_death} at death)")
+
+        # Recalculate lifespan based on new birth year and era when they assume power
         actual_power_year = succession_year + 1
         if actual_power_year < 1800:
             min_lifespan = 55
@@ -923,13 +940,10 @@ class AlternateHistoryGenerator:
             min_lifespan = 65
             max_lifespan = 105
 
-        # Check if current lifespan is below minimum for this era
-        current_lifespan = successor.final_death_year - successor.birth_year
-        if current_lifespan < min_lifespan:
-            print(f"[DEBUG] Adjusting lifespan from {current_lifespan} to minimum {min_lifespan} for era {actual_power_year}")
-            # Recalculate with proper minimum
-            new_lifespan = random.randint(min_lifespan, max_lifespan)
-            successor.final_death_year = successor.birth_year + new_lifespan
+        # Generate new lifespan and death year based on new birth year
+        new_lifespan = random.randint(min_lifespan, max_lifespan)
+        successor.final_death_year = successor.birth_year + new_lifespan
+        print(f"[DEBUG] Successor lifespan: {new_lifespan} years, death year: {successor.final_death_year}")
 
         # Override name to keep family last name
         last_name = dictator.name.split()[1]
