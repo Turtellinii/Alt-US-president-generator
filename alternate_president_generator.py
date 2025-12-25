@@ -363,7 +363,7 @@ class Party:
 class President:
     """Represents a president"""
 
-    def __init__(self, election_year, party=None, is_successor=False, is_first_president=False):
+    def __init__(self, election_year, party=None, is_successor=False, is_first_president=False, age_range=None):
         self.election_year = election_year
         self.party = party
         self.is_successor = is_successor
@@ -445,8 +445,12 @@ class President:
             self.economic_score = max(-100, min(100, party.economic_score + personal_economic))
 
         # Generate life years
-        # Birth year: election year - random(35-70)
-        age_at_election = random.randint(35, 70)
+        # Birth year: election year - random age
+        # Use custom age range if provided (for dictator successors), otherwise default 35-70
+        if age_range:
+            age_at_election = random.randint(age_range[0], age_range[1])
+        else:
+            age_at_election = random.randint(35, 70)
         self.birth_year = election_year - age_at_election
 
         # Death year based on era (lowered minimum lifespans)
@@ -895,55 +899,17 @@ class AlternateHistoryGenerator:
         """
         succession_year = dictator.death_year if dictator.dies_in_office else dictator.final_death_year
 
-        print(f"[DEBUG] Generating successor for {dictator.name} who died in {dictator.final_death_year}")
-        print(f"[DEBUG] succession_year = {succession_year}")
-
-        # Create a full president object with no party (dictators have no party affiliation)
-        successor = President(succession_year, party=None)
-
-        # Override birth year to make successor younger (family member)
-        # Successor should be at least 15 years younger than dictator
-        # and can be as young as 15 when assuming power
+        # Calculate age range for successor (at least 15 years younger, as young as 15)
         dictator_age_at_death = dictator.final_death_year - dictator.birth_year
-        max_successor_age = dictator_age_at_death - 15  # At least 15 years younger
-        min_successor_age = 15  # Can be as young as 15
+        max_successor_age = dictator_age_at_death - 15
+        min_successor_age = 15
 
-        # Ensure we have a valid range
+        # Ensure valid range
         if max_successor_age < min_successor_age:
-            # Dictator died very young, use minimum age
-            successor_age = min_successor_age
-        else:
-            successor_age = random.randint(min_successor_age, max_successor_age)
+            max_successor_age = min_successor_age
 
-        # Recalculate birth year based on new age
-        successor.birth_year = succession_year - successor_age
-        print(f"[DEBUG] Successor age at assumption: {successor_age} (dictator was {dictator_age_at_death} at death)")
-
-        # Recalculate lifespan based on new birth year and era when they assume power
-        actual_power_year = succession_year + 1
-        if actual_power_year < 1800:
-            min_lifespan = 55
-            max_lifespan = 80
-        elif actual_power_year < 1851:
-            min_lifespan = 55
-            max_lifespan = 85
-        elif actual_power_year < 1900:
-            min_lifespan = 60
-            max_lifespan = 90
-        elif actual_power_year < 1951:
-            min_lifespan = 60
-            max_lifespan = 95
-        elif actual_power_year < 2001:
-            min_lifespan = 65
-            max_lifespan = 100
-        else:
-            min_lifespan = 65
-            max_lifespan = 105
-
-        # Generate new lifespan and death year based on new birth year
-        new_lifespan = random.randint(min_lifespan, max_lifespan)
-        successor.final_death_year = successor.birth_year + new_lifespan
-        print(f"[DEBUG] Successor lifespan: {new_lifespan} years, death year: {successor.final_death_year}")
+        # Create successor with custom age range
+        successor = President(succession_year, party=None, age_range=(min_successor_age, max_successor_age))
 
         # Override name to keep family last name
         last_name = dictator.name.split()[1]
