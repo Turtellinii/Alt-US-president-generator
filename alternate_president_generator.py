@@ -418,8 +418,11 @@ class President:
         else:
             self.eye_color = "Green"
 
-        # Height: 5'4" to 6'4"
-        height_inches = random.randint(64, 76)
+        # Height: 5'4" to 6'4" for males, 4'11" to 5'11" for females
+        if is_female:
+            height_inches = random.randint(59, 71)  # 4'11" to 5'11"
+        else:
+            height_inches = random.randint(64, 76)  # 5'4" to 6'4"
         feet = height_inches // 12
         inches = height_inches % 12
         self.height = f"{feet}'{inches}\""
@@ -1008,9 +1011,16 @@ class AlternateHistoryGenerator:
         dictator_inches = int(dictator_height_parts[1])
         dictator_total_inches = dictator_feet * 12 + dictator_inches
 
-        # Generate height within ±5 inches
-        min_height = max(64, dictator_total_inches - 5)  # No shorter than 5'4"
-        max_height = min(76, dictator_total_inches + 5)  # No taller than 6'4"
+        # Generate height within ±5 inches (with gender-specific bounds)
+        if successor.gender == "Female":
+            absolute_min = 59  # 4'11"
+            absolute_max = 71  # 5'11"
+        else:
+            absolute_min = 64  # 5'4"
+            absolute_max = 76  # 6'4"
+
+        min_height = max(absolute_min, dictator_total_inches - 5)
+        max_height = min(absolute_max, dictator_total_inches + 5)
         successor_height_inches = random.randint(min_height, max_height)
         successor_feet = successor_height_inches // 12
         successor_inches = successor_height_inches % 12
