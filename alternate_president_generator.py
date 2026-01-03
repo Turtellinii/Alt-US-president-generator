@@ -937,12 +937,30 @@ class AlternateHistoryGenerator:
         successor.completed_term_end = successor.term_end
         successor.num_terms = 999  # Special marker for dictator
 
+        # Recalculate natural death year for dictator successor
+        # (President.__init__ may have set wrong final_death_year if they rolled dies_in_office)
+        # Determine lifespan based on succession year era
+        if succession_year < 1800:
+            lifespan = random.randint(55, 80)
+        elif succession_year < 1851:
+            lifespan = random.randint(55, 85)
+        elif succession_year < 1900:
+            lifespan = random.randint(60, 90)
+        elif succession_year < 1951:
+            lifespan = random.randint(60, 95)
+        elif succession_year < 2001:
+            lifespan = random.randint(65, 100)
+        else:
+            lifespan = random.randint(65, 105)
+
+        natural_death_year = successor.birth_year + lifespan
+        successor.final_death_year = natural_death_year
+
         # Determine if assassinated (8/45 chance)
         assassination_roll = random.randint(1, 45)
         print(f"[DEBUG] Assassination roll for {successor.name}: {assassination_roll}/45 (assassinated if <= 8)")
         if assassination_roll <= 8:
             # Will be assassinated
-            natural_death_year = successor.final_death_year
             # Assassination happens sometime between assuming power and natural death
             successor.final_death_year = random.randint(successor.term_start, natural_death_year)
             successor.death_cause = "Assassination"
