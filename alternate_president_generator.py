@@ -386,6 +386,55 @@ class President:
         gender_code = 'F' if is_female else 'M'
         self.personality = generate_mbti_profile(gender_code)
 
+        # Generate physical appearance
+        # Hair color: 51% brown, 28% blonde, 12% black, 9% red
+        hair_roll = random.randint(1, 100)
+        if hair_roll <= 51:
+            self.hair_color = "Brown"
+        elif hair_roll <= 79:
+            self.hair_color = "Blonde"
+        elif hair_roll <= 91:
+            self.hair_color = "Black"
+        else:
+            self.hair_color = "Red"
+
+        # Hair texture: 25% straight, 50% wavy, 25% curly
+        texture_roll = random.randint(1, 100)
+        if texture_roll <= 25:
+            self.hair_texture = "Straight"
+        elif texture_roll <= 75:
+            self.hair_texture = "Wavy"
+        else:
+            self.hair_texture = "Curly"
+
+        # Eye color: 46% brown, 27% blue, 18% hazel, 9% green
+        eye_roll = random.randint(1, 100)
+        if eye_roll <= 46:
+            self.eye_color = "Brown"
+        elif eye_roll <= 73:
+            self.eye_color = "Blue"
+        elif eye_roll <= 91:
+            self.eye_color = "Hazel"
+        else:
+            self.eye_color = "Green"
+
+        # Height: 5'4" to 6'4"
+        height_inches = random.randint(64, 76)
+        feet = height_inches // 12
+        inches = height_inches % 12
+        self.height = f"{feet}'{inches}\""
+
+        # Build: 30% thin, 20% muscular, 40% average, 10% fat
+        build_roll = random.randint(1, 100)
+        if build_roll <= 30:
+            self.build = "Thin"
+        elif build_roll <= 50:
+            self.build = "Muscular"
+        elif build_roll <= 90:
+            self.build = "Average"
+        else:
+            self.build = "Fat"
+
         # Determine if dies during presidency
         death_roll = random.randint(1, 45)
         if death_roll <= 37:
@@ -521,6 +570,7 @@ class President:
             f"State of Origin: {self.state}",
             f"Wealth: {self.wealth_class} (Score: {self.wealth_score}/10)",
             f"Personality: {self.personality}",
+            f"Appearance: {self.hair_texture} {self.hair_color} hair, {self.eye_color} eyes, {self.height}, {self.build} build",
         ])
 
         if self.successor:
@@ -963,6 +1013,7 @@ class AlternateHistoryGenerator:
             print(f"   Wealth: {successor.wealth_class} (Score: {successor.wealth_score}/10)")
             print(f"   Life: {successor.birth_year}-{successor.final_death_year} ({successor.final_death_year - successor.birth_year} years) - ASSASSINATED")
             print(f"   Personality: {successor.personality}")
+            print(f"   Appearance: {successor.hair_texture} {successor.hair_color} hair, {successor.eye_color} eyes, {successor.height}, {successor.build} build")
         else:
             # Dies naturally
             successor.death_cause = None
@@ -976,6 +1027,7 @@ class AlternateHistoryGenerator:
             print(f"   Wealth: {successor.wealth_class} (Score: {successor.wealth_score}/10)")
             print(f"   Life: {successor.birth_year}-{successor.final_death_year} ({successor.final_death_year - successor.birth_year} years)")
             print(f"   Personality: {successor.personality}")
+            print(f"   Appearance: {successor.hair_texture} {successor.hair_color} hair, {successor.eye_color} eyes, {successor.height}, {successor.build} build")
 
         # Dictator rules until natural death or assassination - no predetermined death in office
         successor.dies_in_office = False
