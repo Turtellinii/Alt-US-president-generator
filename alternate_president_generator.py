@@ -473,6 +473,8 @@ class President:
             lifespan = random.randint(65, 105)
             lifespan_range = "65-105 (>= 2001)"
 
+        # Store lifespan as attribute for dictator successors
+        self.lifespan = lifespan
         natural_death_year = self.birth_year + lifespan
 
         # Debug logging for dictator successors
@@ -937,23 +939,10 @@ class AlternateHistoryGenerator:
         successor.completed_term_end = successor.term_end
         successor.num_terms = 999  # Special marker for dictator
 
-        # Recalculate natural death year for dictator successor
-        # (President.__init__ may have set wrong final_death_year if they rolled dies_in_office)
-        # Determine lifespan based on succession year era
-        if succession_year < 1800:
-            lifespan = random.randint(55, 80)
-        elif succession_year < 1851:
-            lifespan = random.randint(55, 85)
-        elif succession_year < 1900:
-            lifespan = random.randint(60, 90)
-        elif succession_year < 1951:
-            lifespan = random.randint(60, 95)
-        elif succession_year < 2001:
-            lifespan = random.randint(65, 100)
-        else:
-            lifespan = random.randint(65, 105)
-
-        natural_death_year = successor.birth_year + lifespan
+        # Fix final_death_year to use natural death (not dies_in_office)
+        # President.__init__ may have set wrong final_death_year if they rolled dies_in_office
+        # Use the original lifespan that was calculated
+        natural_death_year = successor.birth_year + successor.lifespan
         successor.final_death_year = natural_death_year
 
         # Determine if assassinated (8/45 chance)
