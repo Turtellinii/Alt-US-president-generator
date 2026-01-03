@@ -983,6 +983,39 @@ class AlternateHistoryGenerator:
         successor.social_score = max(-100, min(100, dictator.social_score + political_variance_social))
         successor.economic_score = max(-100, min(100, dictator.economic_score + political_variance_economic))
 
+        # Inherit some physical appearance from predecessor (family resemblance)
+        # Hair color: 50% chance to inherit
+        if random.randint(1, 2) == 1:
+            successor.hair_color = dictator.hair_color
+        # else keep the randomly generated one
+
+        # Hair texture: 50% chance to inherit
+        if random.randint(1, 2) == 1:
+            successor.hair_texture = dictator.hair_texture
+
+        # Eye color: 50% chance to inherit
+        if random.randint(1, 2) == 1:
+            successor.eye_color = dictator.eye_color
+
+        # Build: 50% chance to inherit
+        if random.randint(1, 2) == 1:
+            successor.build = dictator.build
+
+        # Height: Within ±5 inches of predecessor
+        # Parse predecessor's height
+        dictator_height_parts = dictator.height.replace('"', '').split("'")
+        dictator_feet = int(dictator_height_parts[0])
+        dictator_inches = int(dictator_height_parts[1])
+        dictator_total_inches = dictator_feet * 12 + dictator_inches
+
+        # Generate height within ±5 inches
+        min_height = max(64, dictator_total_inches - 5)  # No shorter than 5'4"
+        max_height = min(76, dictator_total_inches + 5)  # No taller than 6'4"
+        successor_height_inches = random.randint(min_height, max_height)
+        successor_feet = successor_height_inches // 12
+        successor_inches = successor_height_inches % 12
+        successor.height = f"{successor_feet}'{successor_inches}\""
+
         # Set term details for dictator
         successor.term_start = succession_year + 1
         successor.term_end = succession_year + 50  # Placeholder, will rule until death
