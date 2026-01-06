@@ -1215,7 +1215,7 @@ class AlternateHistoryGenerator:
                     else:
                         print(f"   ✗ Revolution FAILED")
                         # Increase success chance for next attempt
-                        self.revolution_success_chance = min(100, self.revolution_success_chance + 20)
+                        self.revolution_success_chance = min(100, self.revolution_success_chance + 10)
                         print(f"   Next revolution success chance: {self.revolution_success_chance}%")
                 else:
                     print(f"   No revolution attempted this cycle")
