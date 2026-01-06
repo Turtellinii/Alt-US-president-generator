@@ -732,15 +732,18 @@ class AlternateHistoryGenerator:
             successor.term_end = original_term_end
 
         # Fix death_year if dies_in_office is True
-        # The death_year was calculated in __init__ using the wrong term_start/term_end
-        # Recalculate it using the corrected values
+        # For successors: they complete a partial term, then may serve full elected terms
+        # If they die in office with 2+ elected terms, die in SECOND elected term
         if successor.dies_in_office:
             if successor.num_terms >= 2:
-                # Die in second term only (4 years after term_start)
-                second_term_start = successor.term_start + 4
-                successor.death_year = random.randint(second_term_start, successor.term_end)
+                # Die in second ELECTED term (not counting partial term)
+                second_elected_term_start = successor.election_year + 4
+                successor.death_year = random.randint(second_elected_term_start, successor.term_end)
+            elif successor.num_terms == 1:
+                # Die in the one elected term (after partial term)
+                successor.death_year = random.randint(successor.election_year, successor.term_end)
             else:
-                # Single term or partial term - can die anytime during the term
+                # Not reelected - die in partial term only
                 successor.death_year = random.randint(successor.term_start, successor.term_end)
             successor.term_end = successor.death_year
 
@@ -1341,31 +1344,46 @@ class AlternateHistoryGenerator:
                             successor.completed_term_end = successor.term_end
 
                             # Fix death_year if dies_in_office is True
-                            # The death_year was calculated in __init__ using the wrong term_start/term_end
-                            # Recalculate it using the corrected values
+                            # For hybrid successors: they complete a partial term, then serve full elected terms
+                            # If they die in office with 2+ elected terms, die in SECOND elected term
                             if successor.dies_in_office:
                                 if successor.num_terms >= 2:
-                                    # Die in second term only (4 years after term_start)
-                                    second_term_start = successor.term_start + 4
-                                    successor.death_year = random.randint(second_term_start, successor.term_end)
+                                    # Die in second ELECTED term (not counting partial term)
+                                    second_elected_term_start = successor.election_year + 4
+                                    successor.death_year = random.randint(second_elected_term_start, successor.term_end)
+                                elif successor.num_terms == 1:
+                                    # Die in the one elected term (after partial term)
+                                    successor.death_year = random.randint(successor.election_year, successor.term_end)
                                 else:
-                                    # Single term or partial term - can die anytime during the term
+                                    # Shouldn't happen for hybrid successors, but handle anyway
                                     successor.death_year = random.randint(successor.term_start, successor.term_end)
                                 successor.term_end = successor.death_year
 
-                            self.presidents.append(successor)
-                            
-                            print(f"\nSuccessor for {self.current_dictator.name}:")
-                            print(successor)
-                            
+                            # Keep generating successors if this one also dies in office
+                            current_successor = successor
+                            while current_successor.dies_in_office:
+                                self.presidents.append(current_successor)
+                                print(f"\nSuccessor for {self.current_dictator.name if current_successor == successor else current_successor_prev.name}:")
+                                print(current_successor)
+
+                                # Generate next successor
+                                current_successor_prev = current_successor
+                                next_successor = self.generate_successor(current_successor)
+                                current_successor = next_successor
+
+                            # Append the final successor who doesn't die in office
+                            self.presidents.append(current_successor)
+                            print(f"\nSuccessor for {current_successor_prev.name}:")
+                            print(current_successor)
+
                             # Transition to one-party state
                             print(f"\n   Regime transitions to ONE-PARTY STATE")
                             print(f"   Ruling party: {self.regime_party.name}")
                             self.regime_type = 'one_party'
                             self.current_dictator = None
-                            
-                            # Schedule next election when successor's term ends
-                            self.scheduled_election_year = successor.term_end
+
+                            # Schedule next election when final successor's term ends
+                            self.scheduled_election_year = current_successor.term_end
                             
                             # Continue revolution checks - jump to next 4-year interval
                             years_since_regime = year - self.regime_start_year
