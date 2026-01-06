@@ -731,6 +731,19 @@ class AlternateHistoryGenerator:
             successor.num_terms = 0  # Didn't serve a full elected term
             successor.term_end = original_term_end
 
+        # Fix death_year if dies_in_office is True
+        # The death_year was calculated in __init__ using the wrong term_start/term_end
+        # Recalculate it using the corrected values
+        if successor.dies_in_office:
+            if successor.num_terms >= 2:
+                # Die in second term only (4 years after term_start)
+                second_term_start = successor.term_start + 4
+                successor.death_year = random.randint(second_term_start, successor.term_end)
+            else:
+                # Single term or partial term - can die anytime during the term
+                successor.death_year = random.randint(successor.term_start, successor.term_end)
+            successor.term_end = successor.death_year
+
         return successor
 
     def attempt_term_extension(self, president, current_year):
@@ -1326,7 +1339,20 @@ class AlternateHistoryGenerator:
                             # Add their own terms after completing the partial term
                             successor.term_end = term_end + (successor.num_terms * 4)
                             successor.completed_term_end = successor.term_end
-                            
+
+                            # Fix death_year if dies_in_office is True
+                            # The death_year was calculated in __init__ using the wrong term_start/term_end
+                            # Recalculate it using the corrected values
+                            if successor.dies_in_office:
+                                if successor.num_terms >= 2:
+                                    # Die in second term only (4 years after term_start)
+                                    second_term_start = successor.term_start + 4
+                                    successor.death_year = random.randint(second_term_start, successor.term_end)
+                                else:
+                                    # Single term or partial term - can die anytime during the term
+                                    successor.death_year = random.randint(successor.term_start, successor.term_end)
+                                successor.term_end = successor.death_year
+
                             self.presidents.append(successor)
                             
                             print(f"\nSuccessor for {self.current_dictator.name}:")
