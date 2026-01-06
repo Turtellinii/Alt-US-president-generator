@@ -1528,8 +1528,9 @@ class AlternateHistoryGenerator:
                     next_election_year = last_president.completed_term_end
 
                 # Handle successor if president dies
+                # Keep generating successors until we get one who doesn't die in office
                 last_president = self.presidents[-1]
-                if last_president.dies_in_office:
+                while last_president.dies_in_office:
                     successor = self.generate_successor(last_president)
                     last_president.successor = successor
                     self.presidents.append(successor)
@@ -1550,6 +1551,9 @@ class AlternateHistoryGenerator:
                                 pass
                         # Update next election year if successor got extensions
                         next_election_year = successor.term_end
+
+                    # Move to the successor to check if they also die in office
+                    last_president = successor
 
         # Print summary
         self.print_summary()
