@@ -555,11 +555,15 @@ class President:
         party_str = self.party.name if self.party else "No Party"
         terms_str = f"{self.num_terms} term{'s' if self.num_terms > 1 else ''}"
 
+        # Calculate age during term
+        age_at_start = self.term_start - self.birth_year
+        age_at_end = self.term_end - self.birth_year
+
         result = [
             f"\n{'='*80}",
             f"President: {self.name} ({self.gender})",
             f"Election Year: {self.election_year}",
-            f"Term: {self.term_start}-{self.term_end}",
+            f"Term: {self.term_start}-{self.term_end} (age {age_at_start}-{age_at_end})",
             f"Party: {party_str}",
             f"Number of Terms: {terms_str}",
         ]
@@ -603,6 +607,11 @@ class AlternateHistoryGenerator:
         self.regime_start_year = None  # Year the regime was established
         self.last_revolution_check_year = None  # Last year a revolution check was performed
         self.scheduled_election_year = None  # For one-party states: when the next election is scheduled
+
+        # Statistics tracking
+        self.third_term_count = 0
+        self.fourth_term_count = 0
+        self.authoritarian_regimes = []  # List of dicts with 'type', 'start_year', 'end_year'
 
     def initialize_parties(self):
         """Initialize political parties in 1792"""
@@ -893,6 +902,13 @@ class AlternateHistoryGenerator:
             self.regime_start_year = president.term_end
             self.last_revolution_check_year = None
 
+            # Track regime for statistics
+            self.authoritarian_regimes.append({
+                'type': auth_type,
+                'start_year': president.term_end,
+                'end_year': None  # Will be set when regime ends
+            })
+
             # For dictatorships and hybrid regimes, check if dictator is assassinated
             if auth_type in ['dictatorship', 'hybrid']:
                 assassination_roll = random.randint(1, 45)
@@ -1130,6 +1146,10 @@ class AlternateHistoryGenerator:
                 print(f"   ✓ {leader_name} has voluntarily RESTORED DEMOCRACY!")
                 print(f"   🎉 DEMOCRACY RESTORED!")
 
+                # Track regime end for statistics
+                if self.authoritarian_regimes:
+                    self.authoritarian_regimes[-1]['end_year'] = year
+
                 # Reset regime (peaceful transition - no imprisonments)
                 self.is_authoritarian = False
                 self.regime_type = None
@@ -1196,6 +1216,10 @@ class AlternateHistoryGenerator:
                             print(f"   {self.regime_party.name} has been ELIMINATED")
                             self.regime_party.dissolved = True
 
+                        # Track regime end for statistics
+                        if self.authoritarian_regimes:
+                            self.authoritarian_regimes[-1]['end_year'] = year
+
                         # Reset regime
                         self.is_authoritarian = False
                         self.regime_type = None
@@ -1242,6 +1266,10 @@ class AlternateHistoryGenerator:
 
         # Check for term extension attempt
         got_third, got_fourth, auth_type = self.attempt_term_extension(first_president, first_president.term_end)
+        if got_third:
+            self.third_term_count += 1
+        if got_fourth:
+            self.fourth_term_count += 1
 
         # Next election happens in the year the term ends
         next_election_year = first_president.completed_term_end
@@ -1256,6 +1284,10 @@ class AlternateHistoryGenerator:
             # Check if successor should attempt term extensions (if they got 2 full elected terms)
             if successor.num_terms == 2:
                 got_third_succ, got_fourth_succ, auth_type_succ = self.attempt_term_extension(successor, successor.term_end)
+                if got_third_succ:
+                    self.third_term_count += 1
+                if got_fourth_succ:
+                    self.fourth_term_count += 1
                 if got_fourth_succ and auth_type_succ:
                     if not self.attempt_authoritarian_takeover(successor, auth_type_succ):
                         # Takeover failed
@@ -1486,6 +1518,10 @@ class AlternateHistoryGenerator:
 
                         sitting_president.extension_checked = True
                         got_third, got_fourth, auth_type = self.attempt_term_extension(sitting_president, sitting_president.term_end)
+                        if got_third:
+                            self.third_term_count += 1
+                        if got_fourth:
+                            self.fourth_term_count += 1
 
                         if got_third or got_fourth:
                             president_got_extension = True
@@ -1563,6 +1599,10 @@ class AlternateHistoryGenerator:
                     # Check if successor should attempt term extensions (if they got 2 full elected terms and no revolution)
                     if successor.num_terms == 2 and not revolution_succeeded:
                         got_third_succ, got_fourth_succ, auth_type_succ = self.attempt_term_extension(successor, successor.term_end)
+                        if got_third_succ:
+                            self.third_term_count += 1
+                        if got_fourth_succ:
+                            self.fourth_term_count += 1
                         if got_fourth_succ and auth_type_succ:
                             if not self.attempt_authoritarian_takeover(successor, auth_type_succ):
                                 # Takeover failed
@@ -1597,6 +1637,23 @@ class AlternateHistoryGenerator:
 
         female_presidents = sum(1 for p in self.presidents if p.gender == "Female")
         print(f"\nFemale presidents: {female_presidents}")
+
+        print(f"\nPresidents who won 3rd term: {self.third_term_count}")
+        print(f"Presidents who won 4th term: {self.fourth_term_count}")
+
+        print(f"\nAuthoritarian regimes created: {len(self.authoritarian_regimes)}")
+        if self.authoritarian_regimes:
+            for i, regime in enumerate(self.authoritarian_regimes, 1):
+                regime_type = regime['type'].replace('_', ' ').title()
+                start = regime['start_year']
+                end = regime['end_year']
+                if end:
+                    duration = end - start
+                    print(f"  {i}. {regime_type} ({start}-{end}, {duration} years)")
+                else:
+                    # Regime still in effect at end of simulation
+                    duration = 2024 - start
+                    print(f"  {i}. {regime_type} ({start}-present, {duration} years)")
 
         print("\nActive parties at end of simulation:")
         for party in active_parties:
