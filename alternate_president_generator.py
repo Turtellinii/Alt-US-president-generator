@@ -1395,19 +1395,20 @@ class AlternateHistoryGenerator:
 
                             # Keep generating successors if this one also dies in office
                             current_successor = successor
+                            predecessor_name = self.current_dictator.name
                             while current_successor.dies_in_office:
                                 self.presidents.append(current_successor)
-                                print(f"\nSuccessor for {self.current_dictator.name if current_successor == successor else current_successor_prev.name}:")
+                                print(f"\nSuccessor for {predecessor_name}:")
                                 print(current_successor)
 
                                 # Generate next successor
-                                current_successor_prev = current_successor
+                                predecessor_name = current_successor.name
                                 next_successor = self.generate_successor(current_successor)
                                 current_successor = next_successor
 
                             # Append the final successor who doesn't die in office
                             self.presidents.append(current_successor)
-                            print(f"\nSuccessor for {current_successor_prev.name}:")
+                            print(f"\nSuccessor for {predecessor_name}:")
                             print(current_successor)
 
                             # Transition to one-party state
