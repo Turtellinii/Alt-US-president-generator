@@ -734,11 +734,13 @@ class AlternateHistoryGenerator:
             successor.election_year = original_term_end
             successor.num_terms = additional_terms
             successor.term_end = original_term_end + (additional_terms * 4)
+            successor.completed_term_end = successor.term_end
         else:
             # Not reelected - only completes original term
             successor.election_year = deceased_president.election_year  # They weren't elected themselves
             successor.num_terms = 0  # Didn't serve a full elected term
             successor.term_end = original_term_end
+            successor.completed_term_end = original_term_end
 
         # Fix death_year if dies_in_office is True
         # For successors: they complete a partial term, then may serve full elected terms
