@@ -965,11 +965,13 @@ class AlternateHistoryGenerator:
             # Dictatorships are personal power grabs - party not necessarily involved
             # One-party and hybrid regimes require party involvement
             if auth_type in ['one_party', 'hybrid']:
-                print(f"   {president.party.name} has been ELIMINATED")
-                president.party.dissolved = True
+                if president.party:
+                    print(f"   {president.party.name} has been ELIMINATED")
+                    president.party.dissolved = True
             else:
                 # Dictatorship attempt - party survives and disavows the president
-                print(f"   {president.party.name} disavows {president.name}")
+                if president.party:
+                    print(f"   {president.party.name} disavows {president.name}")
 
             return False
 
