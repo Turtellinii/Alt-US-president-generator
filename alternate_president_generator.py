@@ -1202,7 +1202,9 @@ class AlternateHistoryGenerator:
                 print(f"   Attempt chance: {self.revolution_attempt_chance}%")
 
                 # Check if revolution is attempted
+                revolution_attempted = False
                 if random.randint(1, 100) <= self.revolution_attempt_chance:
+                    revolution_attempted = True
                     print(f"   ⚔️  REVOLUTION ATTEMPTED!")
                     print(f"   Success chance: {self.revolution_success_chance}%")
 
@@ -1248,11 +1250,15 @@ class AlternateHistoryGenerator:
                         # Increase success chance for next attempt
                         self.revolution_success_chance = min(100, self.revolution_success_chance + 10)
                         print(f"   Next revolution success chance: {self.revolution_success_chance}%")
+                        # Reduce attempt chance by half as penalty for failed revolution
+                        self.revolution_attempt_chance = max(10, self.revolution_attempt_chance // 2)
+                        print(f"   Next revolution attempt chance reduced to: {self.revolution_attempt_chance}%")
                 else:
                     print(f"   No revolution attempted this cycle")
 
-                # Increase attempt chance for next cycle
-                self.revolution_attempt_chance = min(100, self.revolution_attempt_chance + 10)
+                # Increase attempt chance for next cycle (only if no revolution was attempted)
+                if not revolution_attempted:
+                    self.revolution_attempt_chance = min(100, self.revolution_attempt_chance + 10)
 
         return False  # No revolution or failed revolution
 
