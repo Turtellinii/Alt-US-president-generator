@@ -438,17 +438,58 @@ class President:
         else:
             self.build = "Fat"
 
+        # Generate life years (moved before death roll to check age vs lifespan)
+        # Birth year: election year - random age
+        # Use custom age range if provided (for dictator successors), otherwise default 35-70
+        if age_range:
+            age_at_election = random.randint(age_range[0], age_range[1])
+        else:
+            age_at_election = random.randint(35, 70)
+        self.birth_year = election_year - age_at_election
+
+        # Determine minimum lifespan for era
+        if election_year < 1800:
+            min_lifespan = 55
+        elif election_year < 1851:
+            min_lifespan = 55
+        elif election_year < 1900:
+            min_lifespan = 60
+        elif election_year < 1951:
+            min_lifespan = 60
+        elif election_year < 2001:
+            min_lifespan = 65
+        else:
+            min_lifespan = 65
+
         # Determine if dies during presidency
+        # If president is younger than minimum lifespan for their era, reduce natural causes chance
+        is_young_president = age_at_election < min_lifespan
         death_roll = random.randint(1, 45)
-        if death_roll <= 37:
-            self.dies_in_office = False
-            self.death_cause = None
-        elif 38 <= death_roll <= 41:
-            self.dies_in_office = True
-            self.death_cause = "Natural Causes"
-        else:  # 42-45
-            self.dies_in_office = True
-            self.death_cause = "Assassination"
+
+        if is_young_president:
+            # Reduced natural causes chance: 1/45 instead of 4/45
+            # 1-40: survives, 41: natural causes, 42-45: assassination
+            if death_roll <= 40:
+                self.dies_in_office = False
+                self.death_cause = None
+            elif death_roll == 41:
+                self.dies_in_office = True
+                self.death_cause = "Natural Causes"
+            else:  # 42-45
+                self.dies_in_office = True
+                self.death_cause = "Assassination"
+        else:
+            # Normal death chances
+            # 1-37: survives, 38-41: natural causes, 42-45: assassination
+            if death_roll <= 37:
+                self.dies_in_office = False
+                self.death_cause = None
+            elif 38 <= death_roll <= 41:
+                self.dies_in_office = True
+                self.death_cause = "Natural Causes"
+            else:  # 42-45
+                self.dies_in_office = True
+                self.death_cause = "Assassination"
 
         # Determine number of terms
         term_roll = random.randint(1, 46)
@@ -495,15 +536,6 @@ class President:
             personal_economic = random.randint(-40, 40)
             self.social_score = max(-100, min(100, party.social_score + personal_social))
             self.economic_score = max(-100, min(100, party.economic_score + personal_economic))
-
-        # Generate life years
-        # Birth year: election year - random age
-        # Use custom age range if provided (for dictator successors), otherwise default 35-70
-        if age_range:
-            age_at_election = random.randint(age_range[0], age_range[1])
-        else:
-            age_at_election = random.randint(35, 70)
-        self.birth_year = election_year - age_at_election
 
         # Death year based on era (lowered minimum lifespans)
         if election_year < 1800:
