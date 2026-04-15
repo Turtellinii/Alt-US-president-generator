@@ -254,6 +254,53 @@ def get_shift_range(score):
         return (-20, 10)
 
 
+def get_axis_label(score, axis):
+    """Get the ideological label for a score on a given 8values axis"""
+    if axis == 'economic':
+        if score <= -73: return "Communist"
+        elif score <= -44: return "Socialist"
+        elif score <= -15: return "Social"
+        elif score <= 14: return "Centrist"
+        elif score <= 43: return "Market"
+        elif score <= 72: return "Capitalist"
+        else: return "Laissez-Faire"
+    elif axis == 'diplomatic':
+        if score <= -73: return "Chauvinist"
+        elif score <= -44: return "Nationalist"
+        elif score <= -15: return "Patriotic"
+        elif score <= 14: return "Balanced"
+        elif score <= 43: return "Peaceful"
+        elif score <= 72: return "Internationalist"
+        else: return "Cosmopolitan"
+    elif axis == 'civil':
+        if score <= -73: return "Anarchist"
+        elif score <= -44: return "Libertarian"
+        elif score <= -15: return "Liberal"
+        elif score <= 14: return "Moderate"
+        elif score <= 43: return "Statist"
+        elif score <= 72: return "Authoritarian"
+        else: return "Totalitarian"
+    elif axis == 'society':
+        if score <= -73: return "Reactionary"
+        elif score <= -44: return "Very Traditional"
+        elif score <= -15: return "Traditional"
+        elif score <= 14: return "Neutral"
+        elif score <= 43: return "Progressive"
+        elif score <= 72: return "Very Progressive"
+        else: return "Revolutionary"
+
+
+def format_political_position(economic, diplomatic, civil, society):
+    """Format the full 8values political position string with labels"""
+    e_label = get_axis_label(economic, 'economic')
+    d_label = get_axis_label(diplomatic, 'diplomatic')
+    c_label = get_axis_label(civil, 'civil')
+    s_label = get_axis_label(society, 'society')
+    return (f"Economic: {economic:+d}, Diplomatic: {diplomatic:+d}, "
+            f"Civil: {civil:+d}, Society: {society:+d} "
+            f"[{e_label}-{d_label}-{c_label}-{s_label}]")
+
+
 def check_authoritarian_tendency(president):
     """Check if president meets criteria for attempting 3+ terms
 
@@ -282,12 +329,12 @@ def check_authoritarian_tendency(president):
             reasons_met.append(2)
             break
 
-    # Condition 3: President's social score >= 34
-    if president.social_score >= 34:
+    # Condition 3: President's civil score >= 34
+    if president.civil_score >= 34:
         reasons_met.append(3)
 
-    # Condition 4: Party's social score >= 51 (if they have a party)
-    if president.party and president.party.social_score >= 51:
+    # Condition 4: Party's civil score >= 51 (if they have a party)
+    if president.party and president.party.civil_score >= 51:
         reasons_met.append(4)
 
     # Need 2 or more conditions to attempt extra terms
@@ -299,10 +346,12 @@ class Party:
     """Represents a political party"""
     used_colors = set()
 
-    def __init__(self, name, social_score, economic_score, founding_year):
+    def __init__(self, name, civil_score, economic_score, founding_year, diplomatic_score=None, society_score=None):
         self.name = name
-        self.social_score = social_score
+        self.civil_score = civil_score
         self.economic_score = economic_score
+        self.diplomatic_score = diplomatic_score if diplomatic_score is not None else random.randint(-75, 75)
+        self.society_score = society_score if society_score is not None else random.randint(-75, 75)
         self.founding_year = founding_year
         self.last_in_power = None
         self.dissolved = False
@@ -321,10 +370,12 @@ class Party:
         cls.used_colors.add(color)
 
         # New parties start in moderate range (±75) with some diversity
-        social_score = random.randint(-75, 75)
+        civil_score = random.randint(-75, 75)
         economic_score = random.randint(-75, 75)
+        diplomatic_score = random.randint(-75, 75)
+        society_score = random.randint(-75, 75)
 
-        return cls(f"{color} Party", social_score, economic_score, year)
+        return cls(f"{color} Party", civil_score, economic_score, year, diplomatic_score, society_score)
 
     def shift_politics(self):
         """Randomly shift party's political positions
@@ -333,15 +384,16 @@ class Party:
         natural resistance to extreme positions.
         """
         # Get shift ranges based on current positions
-        social_min, social_max = get_shift_range(self.social_score)
+        civil_min, civil_max = get_shift_range(self.civil_score)
         economic_min, economic_max = get_shift_range(self.economic_score)
+        diplomatic_min, diplomatic_max = get_shift_range(self.diplomatic_score)
+        society_min, society_max = get_shift_range(self.society_score)
 
         # Apply shifts with position-dependent ranges
-        social_shift = random.randint(social_min, social_max)
-        economic_shift = random.randint(economic_min, economic_max)
-
-        self.social_score = max(-100, min(100, self.social_score + social_shift))
-        self.economic_score = max(-100, min(100, self.economic_score + economic_shift))
+        self.civil_score = max(-100, min(100, self.civil_score + random.randint(civil_min, civil_max)))
+        self.economic_score = max(-100, min(100, self.economic_score + random.randint(economic_min, economic_max)))
+        self.diplomatic_score = max(-100, min(100, self.diplomatic_score + random.randint(diplomatic_min, diplomatic_max)))
+        self.society_score = max(-100, min(100, self.society_score + random.randint(society_min, society_max)))
 
     def check_dissolution(self, current_year):
         """Check if party should dissolve due to being out of power"""
@@ -357,7 +409,7 @@ class Party:
         return False
 
     def __str__(self):
-        return f"{self.name} (Social: {self.social_score:+d}, Economic: {self.economic_score:+d})"
+        return f"{self.name} ({format_political_position(self.economic_score, self.diplomatic_score, self.civil_score, self.society_score)})"
 
 
 class President:
@@ -523,19 +575,21 @@ class President:
                 self.death_year = random.randint(self.term_start, self.term_end)
             self.term_end = self.death_year
 
-        # Generate political compass scores
+        # Generate 8values political scores
         if party is None:
             # First president, no party
-            self.social_score = random.randint(-100, 100)
             self.economic_score = random.randint(-100, 100)
+            self.diplomatic_score = random.randint(-100, 100)
+            self.civil_score = random.randint(-100, 100)
+            self.society_score = random.randint(-100, 100)
         else:
             # Add individual variation to party scores
             # Wider variance allows for more diversity in authoritarian tendencies
             # Clamp to -100 to 100 range
-            personal_social = random.randint(-40, 40)
-            personal_economic = random.randint(-40, 40)
-            self.social_score = max(-100, min(100, party.social_score + personal_social))
-            self.economic_score = max(-100, min(100, party.economic_score + personal_economic))
+            self.economic_score = max(-100, min(100, party.economic_score + random.randint(-40, 40)))
+            self.diplomatic_score = max(-100, min(100, party.diplomatic_score + random.randint(-40, 40)))
+            self.civil_score = max(-100, min(100, party.civil_score + random.randint(-40, 40)))
+            self.society_score = max(-100, min(100, party.society_score + random.randint(-40, 40)))
 
         # Death year based on era (lowered minimum lifespans)
         if election_year < 1800:
@@ -604,7 +658,7 @@ class President:
             result.append(f"Death in Office: {self.death_year} ({self.death_cause})")
 
         result.extend([
-            f"Political Position: Social {self.social_score:+d}, Economic {self.economic_score:+d}",
+            f"Political Position: {format_political_position(self.economic_score, self.diplomatic_score, self.civil_score, self.society_score)}",
             f"Life: {self.birth_year}-{self.final_death_year} ({self.final_death_year - self.birth_year} years)",
             f"State of Origin: {self.state}",
             f"Wealth: {self.wealth_class} (Score: {self.wealth_score}/10)",
@@ -691,11 +745,13 @@ class AlternateHistoryGenerator:
                 party1 = active_parties[i]
                 party2 = active_parties[j]
 
-                # Check if within 20 points on both axes
-                social_diff = abs(party1.social_score - party2.social_score)
+                # Check if within 20 points on all four axes
+                civil_diff = abs(party1.civil_score - party2.civil_score)
                 economic_diff = abs(party1.economic_score - party2.economic_score)
+                diplomatic_diff = abs(party1.diplomatic_score - party2.diplomatic_score)
+                society_diff = abs(party1.society_score - party2.society_score)
 
-                if social_diff <= 20 and economic_diff <= 20:
+                if civil_diff <= 20 and economic_diff <= 20 and diplomatic_diff <= 20 and society_diff <= 20:
                     # Parties should merge
                     # Extract color names (remove " Party" suffix)
                     color1 = party1.name.replace(" Party", "")
@@ -703,11 +759,13 @@ class AlternateHistoryGenerator:
                     merged_name = f"{color1}-{color2} Party"
 
                     # Calculate average scores
-                    merged_social = (party1.social_score + party2.social_score) // 2
                     merged_economic = (party1.economic_score + party2.economic_score) // 2
+                    merged_diplomatic = (party1.diplomatic_score + party2.diplomatic_score) // 2
+                    merged_civil = (party1.civil_score + party2.civil_score) // 2
+                    merged_society = (party1.society_score + party2.society_score) // 2
 
                     # Create merged party
-                    merged_party = Party(merged_name, merged_social, merged_economic, year)
+                    merged_party = Party(merged_name, merged_civil, merged_economic, year, merged_diplomatic, merged_society)
 
                     # Take the most recent last_in_power
                     if party1.last_in_power is not None and party2.last_in_power is not None:
@@ -718,7 +776,7 @@ class AlternateHistoryGenerator:
                         merged_party.last_in_power = party2.last_in_power
 
                     print(f"\n🤝 {party1.name} and {party2.name} have MERGED into {merged_name}")
-                    print(f"   New position: Social {merged_social:+d}, Economic {merged_economic:+d}")
+                    print(f"   New position: {format_political_position(merged_economic, merged_diplomatic, merged_civil, merged_society)}")
 
                     # Dissolve old parties
                     party1.dissolved = True
@@ -881,7 +939,7 @@ class AlternateHistoryGenerator:
                 if 3 in reasons and 4 in reasons:
                     # 2 + 3 + 4 = Compare scores
                     # MBTI combo + both scores: stronger score determines type
-                    if president.social_score > president.party.social_score:
+                    if president.civil_score > president.party.civil_score:
                         auth_type = 'dictatorship'
                     else:
                         auth_type = 'hybrid'
@@ -900,7 +958,7 @@ class AlternateHistoryGenerator:
                 # Only conditions 3 and/or 4 (no personality conditions)
                 if 3 in reasons and 4 in reasons:
                     # Both scores, no personality - compare strengths
-                    if president.social_score > president.party.social_score:
+                    if president.civil_score > president.party.civil_score:
                         auth_type = 'dictatorship'
                     else:
                         auth_type = 'hybrid'
@@ -1049,10 +1107,10 @@ class AlternateHistoryGenerator:
         successor.wealth_class = get_wealth_class(successor.wealth_score)
 
         # Generate political scores based on predecessor with variance
-        political_variance_social = random.randint(-50, 50)
-        political_variance_economic = random.randint(-50, 50)
-        successor.social_score = max(-100, min(100, dictator.social_score + political_variance_social))
-        successor.economic_score = max(-100, min(100, dictator.economic_score + political_variance_economic))
+        successor.economic_score = max(-100, min(100, dictator.economic_score + random.randint(-50, 50)))
+        successor.diplomatic_score = max(-100, min(100, dictator.diplomatic_score + random.randint(-50, 50)))
+        successor.civil_score = max(-100, min(100, dictator.civil_score + random.randint(-50, 50)))
+        successor.society_score = max(-100, min(100, dictator.society_score + random.randint(-50, 50)))
 
         # Inherit some physical appearance from predecessor (family resemblance)
         # Hair color: 50% chance to inherit
@@ -1120,7 +1178,7 @@ class AlternateHistoryGenerator:
             print(f"   Born: {successor.birth_year}")
             print(f"   From: {successor.state}")
             print(f"   Gender: {successor.gender}")
-            print(f"   Political Position: Social {successor.social_score:+d}, Economic {successor.economic_score:+d}")
+            print(f"   Political Position: {format_political_position(successor.economic_score, successor.diplomatic_score, successor.civil_score, successor.society_score)}")
             print(f"   Wealth: {successor.wealth_class} (Score: {successor.wealth_score}/10)")
             print(f"   Life: {successor.birth_year}-{successor.final_death_year} ({successor.final_death_year - successor.birth_year} years) - ASSASSINATED")
             print(f"   Personality: {successor.personality}")
@@ -1134,7 +1192,7 @@ class AlternateHistoryGenerator:
             print(f"   Born: {successor.birth_year}")
             print(f"   From: {successor.state}")
             print(f"   Gender: {successor.gender}")
-            print(f"   Political Position: Social {successor.social_score:+d}, Economic {successor.economic_score:+d}")
+            print(f"   Political Position: {format_political_position(successor.economic_score, successor.diplomatic_score, successor.civil_score, successor.society_score)}")
             print(f"   Wealth: {successor.wealth_class} (Score: {successor.wealth_score}/10)")
             print(f"   Life: {successor.birth_year}-{successor.final_death_year} ({successor.final_death_year - successor.birth_year} years)")
             print(f"   Personality: {successor.personality}")
@@ -1154,7 +1212,7 @@ class AlternateHistoryGenerator:
         leader_personality = None
 
         if self.regime_type in ['dictatorship', 'hybrid'] and self.current_dictator:
-            leader_social_score = self.current_dictator.social_score
+            leader_social_score = self.current_dictator.civil_score
             leader_name = self.current_dictator.name
             leader_personality = self.current_dictator.personality
         elif self.regime_type == 'one_party':
@@ -1162,7 +1220,7 @@ class AlternateHistoryGenerator:
             # This would be the most recent president
             if self.presidents:
                 current_president = self.presidents[-1]
-                leader_social_score = current_president.social_score
+                leader_social_score = current_president.civil_score
                 leader_name = current_president.name
                 leader_personality = current_president.personality
 
@@ -1175,7 +1233,7 @@ class AlternateHistoryGenerator:
             restoration_chance = abs(leader_social_score)
 
             print(f"\n🕊️  Democracy restoration check (Year {year})...")
-            print(f"   Leader: {leader_name} (Social Score: {leader_social_score:+d})")
+            print(f"   Leader: {leader_name} (Civil Score: {leader_social_score:+d})")
             print(f"   Restoration chance: {restoration_chance}%")
 
             if random.randint(1, 100) <= restoration_chance:
