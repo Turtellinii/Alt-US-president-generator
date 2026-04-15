@@ -848,6 +848,10 @@ class AlternateHistoryGenerator:
                 successor.death_year = random.randint(successor.term_start, successor.term_end)
             successor.term_end = successor.death_year
 
+        # Update party's last_in_power (mirrors what generate_president does)
+        if deceased_president.party:
+            deceased_president.party.last_in_power = successor.completed_term_end
+
         return successor
 
     def attempt_term_extension(self, president, current_year):
