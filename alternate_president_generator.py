@@ -843,7 +843,7 @@ class AlternateHistoryGenerator:
         
         # Now attempt 4th term (40% chance)
         print(f"\n⚠️  {president.name} attempts to run for a FOURTH TERM!")
-        if random.randint(1, 100) <= 40:
+        if random.randint(1, 100) <= 50:
             print(f"   ✓ Fourth term GRANTED! ({president.term_end+1}-{president.term_end+4})")
             president.num_terms = 4
             president.term_end += 4
@@ -928,7 +928,7 @@ class AlternateHistoryGenerator:
         print(f"   Type: {auth_type.upper().replace('_', ' ')}")
 
         # 60% chance of success
-        if random.randint(1, 100) <= 60:
+        if random.randint(1, 100) <= 50:
             print(f"   ✓ TAKEOVER SUCCESSFUL!")
             self.is_authoritarian = True
             self.regime_type = auth_type
@@ -1172,7 +1172,7 @@ class AlternateHistoryGenerator:
 
         # Only check if leader has negative social score
         if leader_social_score is not None and leader_social_score < 0:
-            restoration_chance = abs(leader_social_score) // 2
+            restoration_chance = abs(leader_social_score)
 
             print(f"\n🕊️  Democracy restoration check (Year {year})...")
             print(f"   Leader: {leader_name} (Social Score: {leader_social_score:+d})")
