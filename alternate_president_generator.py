@@ -397,10 +397,8 @@ class Party:
 
     def check_dissolution(self, current_year):
         """Check if party should dissolve due to being out of power"""
-        if self.last_in_power is None:
-            return False
-
-        years_out_of_power = current_year - self.last_in_power
+        baseline = self.last_in_power if self.last_in_power is not None else self.founding_year
+        years_out_of_power = current_year - baseline
         if years_out_of_power >= 20:
             # 1/3 chance of dissolution
             if random.randint(1, 3) == 1:
@@ -733,7 +731,10 @@ class AlternateHistoryGenerator:
         """Check if any parties should dissolve"""
         for party in self.parties:
             if not party.dissolved and party.check_dissolution(year):
-                print(f"\n{party.name} has dissolved after {year - party.last_in_power} years out of power.")
+                baseline = party.last_in_power if party.last_in_power is not None else party.founding_year
+                never_elected = party.last_in_power is None
+                label = "never elected" if never_elected else f"{year - baseline} years out of power"
+                print(f"\n{party.name} has dissolved ({label}).")
 
     def check_party_mergers(self, year):
         """Check if any parties should merge due to political similarity"""
